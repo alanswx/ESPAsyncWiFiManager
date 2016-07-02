@@ -1,9 +1,13 @@
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 
 //needed for library
-#include <ESP8266WebServer.h>
 #include <DNSServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
+
+AsyncWebServer server(80);
+DNSServer dns;
 
 // select wich pin will trigger the configuraton portal when set to LOW
 // ESP-01 users please note: the only pins available (0 and 2), are shared 
@@ -25,8 +29,8 @@ void loop() {
   if ( digitalRead(TRIGGER_PIN) == LOW ) {
     //WiFiManager
     //Local intialization. Once its business is done, there is no need to keep it around
-    WiFiManager wifiManager;
-
+    AsyncWiFiManager wifiManager(&server,&dns);
+    
     //reset settings - for testing
     //wifiManager.resetSettings();
 

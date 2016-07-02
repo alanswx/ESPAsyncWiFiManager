@@ -2,8 +2,8 @@
 
 //needed for library
 #include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
 //for LED status
 #include <Ticker.h>
@@ -17,7 +17,7 @@ void tick()
 }
 
 //gets called when WiFiManager enters configuration mode
-void configModeCallback (WiFiManager *myWiFiManager) {
+void configModeCallback (AsyncWiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
   Serial.println(WiFi.softAPIP());
   //if you used auto generated SSID, print it
@@ -25,6 +25,9 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   //entered config mode, make led toggle faster
   ticker.attach(0.2, tick);
 }
+
+AsyncWebServer server(80);
+DNSServer dns;
 
 void setup() {
   // put your setup code here, to run once:
@@ -37,7 +40,7 @@ void setup() {
 
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
+  AsyncWiFiManager wifiManager(&server,&dns);
   //reset settings - for testing
   //wifiManager.resetSettings();
 

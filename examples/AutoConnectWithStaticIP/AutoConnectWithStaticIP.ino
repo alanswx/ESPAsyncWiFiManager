@@ -4,8 +4,11 @@
 
 //needed for library
 #include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
+AsyncWebServer server(80);
+DNSServer dns;
 
 
 /**************************************************************************************
@@ -30,7 +33,7 @@ void setup() {
 
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
+  AsyncWiFiManager wifiManager(&server,&dns);
 
   //reset settings - for testing
   //wifiManager.resetSettings();
