@@ -85,12 +85,14 @@ class AsyncWiFiManager
     AsyncWiFiManager(AsyncWebServer * server, DNSServer *dns);
 
     void          scan();
-
+    void          loop();
+     
     boolean       autoConnect();
     boolean       autoConnect(char const *apName, char const *apPassword = NULL);
 
     //if you want to always start the config portal, without trying to connect first
     boolean       startConfigPortal(char const *apName, char const *apPassword = NULL);
+    void startConfigPortalModeless(char const *apName, char const *apPassword);
 
     // get the AP name of the config portal, so it can be used in the callback
     String        getConfigPortalSSID();
@@ -133,6 +135,10 @@ class AsyncWiFiManager
     DNSServer      *dnsServer;
     AsyncWebServer *server;
 
+
+    boolean         _modeless;
+    int             scannow;
+    
     //const int     WM_DONE                 = 0;
     //const int     WM_WAIT                 = 10;
 

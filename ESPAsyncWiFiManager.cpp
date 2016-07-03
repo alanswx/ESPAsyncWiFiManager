@@ -62,7 +62,8 @@ const char* AsyncWiFiManagerParameter::getCustomHTML() {
 
 AsyncWiFiManager::AsyncWiFiManager(AsyncWebServer *server, DNSServer *dns) :server(server), dnsServer(dns) {
   wifiSSIDs = NULL;
-wifiSSIDscan=true;
+  wifiSSIDscan=true;
+  _modeless=false;
 }
 
 void AsyncWiFiManager::addParameter(AsyncWiFiManagerParameter *p) {
@@ -215,6 +216,84 @@ if (wifiSSIDscan)
 }
 }
 }
+
+
+void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const *apPassword) {
+
+  _modeless =true;
+  
+  
+  
+  //setup AP
+  WiFi.mode(WIFI_AP_STA);
+  DEBUG_WM("SET AP STA");
+
+  // try to connect
+	if (connectWifi("", "") == WL_CONNECTED)   {
+	DEBUG_WM(F("IP Address:"));
+	DEBUG_WM(WiFi.localIP());
+	//connected
+	
+	}
+
+  
+  _apName = apName;
+  _apPassword = apPassword;
+
+  //notify we entered AP mode
+  if ( _apcallback != NULL) {
+    _apcallback(this);
+  }
+
+  connect = false;
+  setupConfigPortal();
+  int scannow= -1 ;
+
+}
+
+void AsyncWiFiManager::loop(){
+    dnsServer->processNextRequest();
+    if (_modeless)
+    {
+		if ( millis() > scannow + 60000)
+		{
+		DEBUG_WM(F("About to scan()"));
+		scan();
+		scannow= millis() ;
+		}
+		if (connect) {
+		  connect = false;
+		  //delay(2000);
+		  DEBUG_WM(F("Connecting to new AP"));
+
+		  // using user-provided  _ssid, _pass in place of system-stored ssid and pass
+		  if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
+			DEBUG_WM(F("Failed to connect."));
+		  } else {
+			//connected
+			// alanswx - should we have a config to decide if we should shut down AP?
+			// WiFi.mode(WIFI_STA);
+			//notify that configuration has changed and any optional parameters should be saved
+			if ( _savecallback != NULL) {
+			  //todo: check if any custom parameters actually exist, and check if they really changed maybe
+			  _savecallback();
+			}
+			return;
+		  }
+
+		  if (_shouldBreakAfterConfig) {
+			//flag set to exit after config after trying to connect
+			//notify that configuration has changed and any optional parameters should be saved
+			if ( _savecallback != NULL) {
+			  //todo: check if any custom parameters actually exist, and check if they really changed maybe
+			  _savecallback();
+			}
+			return;
+		  }
+		}
+   }
+}
+
 boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPassword) {
   //setup AP
   WiFi.mode(WIFI_AP_STA);
@@ -235,15 +314,15 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
     //DNS
     dnsServer->processNextRequest();
 
-//
-//  we should do a scan every so often here
-//
-if ( millis() > scannow + 10000)
-{
-DEBUG_WM(F("About to scan()"));
-scan();
-scannow= millis() ;
-}
+	//
+	//  we should do a scan every so often here
+	//
+	if ( millis() > scannow + 10000)
+	{
+	DEBUG_WM(F("About to scan()"));
+	scan();
+	scannow= millis() ;
+	}
 
 
     if (connect) {
