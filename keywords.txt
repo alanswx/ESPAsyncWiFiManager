@@ -6,8 +6,8 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-WiFiManager	KEYWORD1
-WiFiManagerParameter KEYWORD1
+AsyncWiFiManager	KEYWORD1
+AsyncWiFiManagerParameter KEYWORD1
 
 
 #######################################

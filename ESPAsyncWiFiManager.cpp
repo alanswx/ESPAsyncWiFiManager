@@ -504,6 +504,9 @@ void AsyncWiFiManager::setBreakAfterConfig(boolean shouldBreak) {
 
 /** Handle root or redirect to captive portal */
 void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
+  // AJS - maybe we should set a scan when we get to the root???
+  // and only scan on demand? timer + on demand? plus a link to make it happen?
+
   DEBUG_WM(F("Handle root"));
   if (captivePortal(request)) { // If caprive portal redirect instead of displaying the page.
     return;

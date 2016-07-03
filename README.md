@@ -1,5 +1,5 @@
-# WiFiManager
-ESP8266 WiFi Connection manager with fallback web configuration portal
+# AsyncWiFiManager
+ESP8266 Async WiFi Connection manager with fallback web configuration portal
 
 [![Build Status](https://travis-ci.org/tzapu/WiFiManager.svg?branch=master)](https://travis-ci.org/tzapu/WiFiManager)
 
@@ -336,6 +336,7 @@ works with the staging release ver. 1.6.5-1044-g170995a, built on Aug 10, 2015 o
 The support and help I got from the community has been nothing short of phenomenal. I can't thank you guys enough. This is my first real attept in developing open source stuff and I must say, now I understand why people are so dedicated to it, it is because of all the wonderful people involved.
 
 __THANK YOU__
+[tzapu](https://github.com/tzapu/)
 
 [Shawn A](https://github.com/tablatronix)
 
