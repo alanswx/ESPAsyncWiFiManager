@@ -325,6 +325,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 	if ( millis() > scannow + 10000)
 	{
 	DEBUG_WM(F("About to scan()"));
+	shouldscan=true;  // since we are modal, we can scan every time
 	scan();
 	scannow= millis() ;
 	}
