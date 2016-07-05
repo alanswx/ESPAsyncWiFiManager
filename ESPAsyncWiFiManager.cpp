@@ -252,7 +252,7 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
 
   connect = false;
   setupConfigPortal();
-  int scannow= -1 ;
+  scannow= -1 ;
 
 }
 
@@ -314,7 +314,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 
   connect = false;
   setupConfigPortal();
-  int scannow= -1 ;
+  scannow= -1 ;
   while (_configPortalTimeout == 0 || millis() < _configPortalStart + _configPortalTimeout) {
     //DNS
     dnsServer->processNextRequest();
@@ -512,6 +512,7 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
   // AJS - maybe we should set a scan when we get to the root???
   // and only scan on demand? timer + on demand? plus a link to make it happen?
   shouldscan=true;
+  scannow= -1 ;
   DEBUG_WM(F("Handle root"));
   if (captivePortal(request)) { // If caprive portal redirect instead of displaying the page.
     return;
@@ -537,6 +538,7 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
 /** Wifi config page handler */
 void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
   shouldscan=true;
+  scannow= -1 ;
 
   String page = FPSTR(WFM_HTTP_HEAD);
   page.replace("{v}", "Config ESP");
