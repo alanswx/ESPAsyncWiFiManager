@@ -138,6 +138,7 @@ class AsyncWiFiManager
 
     boolean         _modeless;
     int             scannow;
+    int             shouldscan;
     
     //const int     WM_DONE                 = 0;
     //const int     WM_WAIT                 = 10;

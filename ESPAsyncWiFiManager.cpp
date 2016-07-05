@@ -64,6 +64,7 @@ AsyncWiFiManager::AsyncWiFiManager(AsyncWebServer *server, DNSServer *dns) :serv
   wifiSSIDs = NULL;
   wifiSSIDscan=true;
   _modeless=false;
+  shouldscan=true;
 }
 
 void AsyncWiFiManager::addParameter(AsyncWiFiManagerParameter *p) {
@@ -154,6 +155,7 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
 
 void AsyncWiFiManager::scan()
 {
+   if (!shouldscan) return;
 
 if (wifiSSIDscan)
 {
@@ -176,6 +178,9 @@ if (wifiSSIDscan)
   if (wifiSSIDs) delete [] wifiSSIDs;
   wifiSSIDs = new WiFiResult[n];
   wifiSSIDCount = n;
+  
+  if (n>0)
+	  shouldscan=false;
 
   for (int i=0;i<n;i++)
   {  
@@ -506,7 +511,7 @@ void AsyncWiFiManager::setBreakAfterConfig(boolean shouldBreak) {
 void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
   // AJS - maybe we should set a scan when we get to the root???
   // and only scan on demand? timer + on demand? plus a link to make it happen?
-
+  shouldscan=true;
   DEBUG_WM(F("Handle root"));
   if (captivePortal(request)) { // If caprive portal redirect instead of displaying the page.
     return;
@@ -531,6 +536,7 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
 
 /** Wifi config page handler */
 void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
+  shouldscan=true;
 
   String page = FPSTR(WFM_HTTP_HEAD);
   page.replace("{v}", "Config ESP");
