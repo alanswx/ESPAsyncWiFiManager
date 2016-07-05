@@ -156,7 +156,7 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
 void AsyncWiFiManager::scan()
 {
    if (!shouldscan) return;
-
+DEBUG_WM(F("About to scan()"));
 if (wifiSSIDscan)
 {
   delay(100);
@@ -262,7 +262,7 @@ void AsyncWiFiManager::loop(){
     {
 		if ( millis() > scannow + 60000)
 		{
-		DEBUG_WM(F("About to scan()"));
+		
 		scan();
 		scannow= millis() ;
 		}
