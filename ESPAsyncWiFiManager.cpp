@@ -226,8 +226,13 @@ if (wifiSSIDscan)
 void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const *apPassword) {
 
   _modeless =true;
+  _apName = apName;
+  _apPassword = apPassword;
+ 
+  /*
+  AJS - do we want this?
   
-  
+  */
   
   //setup AP
   WiFi.mode(WIFI_AP_STA);
@@ -238,12 +243,12 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
 	DEBUG_WM(F("IP Address:"));
 	DEBUG_WM(WiFi.localIP());
 	//connected
-	
+	// call the callback!
+	  _savecallback();
+
 	}
 
   
-  _apName = apName;
-  _apPassword = apPassword;
 
   //notify we entered AP mode
   if ( _apcallback != NULL) {
@@ -260,7 +265,7 @@ void AsyncWiFiManager::loop(){
     dnsServer->processNextRequest();
     if (_modeless)
     {
-		if ( millis() > scannow + 60000)
+		if ( scannow==-1 || millis() > scannow + 60000)
 		{
 		
 		scan();
@@ -380,10 +385,10 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
     DEBUG_WM(WiFi.localIP());
   }
   //fix for auto connect racing issue
-  if (WiFi.status() == WL_CONNECTED) {
-    DEBUG_WM("Already connected. Bailing out.");
-    return WL_CONNECTED;
-  }
+//  if (WiFi.status() == WL_CONNECTED) {
+//    DEBUG_WM("Already connected. Bailing out.");
+//    return WL_CONNECTED;
+//  }
   //check if we have ssid and pass and force those, if not, try with last saved values
   if (ssid != "") {
     WiFi.begin(ssid.c_str(), pass.c_str());
@@ -515,7 +520,7 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
   shouldscan=true;
   scannow= -1 ;
   DEBUG_WM(F("Handle root"));
-  if (captivePortal(request)) { // If caprive portal redirect instead of displaying the page.
+  if (captivePortal(request)) { // If captive portal redirect instead of displaying the page.
     return;
   }
 
@@ -711,6 +716,7 @@ void AsyncWiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
   page += FPSTR(HTTP_SCRIPT);
   page += FPSTR(HTTP_STYLE);
   page += _customHeadElement;
+  page += F("<meta http-equiv=\"refresh\" content=\"5; url=/i\">");
   page += FPSTR(HTTP_HEAD_END);
   page += FPSTR(HTTP_SAVED);
   page += FPSTR(HTTP_END);
@@ -731,8 +737,16 @@ void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
   page += FPSTR(HTTP_SCRIPT);
   page += FPSTR(HTTP_STYLE);
   page += _customHeadElement;
+  if (connect==true)
+  	page += F("<meta http-equiv=\"refresh\" content=\"5; url=/i\">");
   page += FPSTR(HTTP_HEAD_END);
   page += F("<dl>");
+  if (connect==true)
+  {
+  	page += F("<dt>Trying to connect</dt><dd>");
+  	page += WiFi.status();
+  	page += F("</dd>");
+  }
   page += F("<dt>Chip ID</dt><dd>");
   page += ESP.getChipId();
   page += F("</dd>");
@@ -750,6 +764,12 @@ void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
   page += F("</dd>");
   page += F("<dt>Soft AP MAC</dt><dd>");
   page += WiFi.softAPmacAddress();
+  page += F("</dd>");
+  page += F("<dt>Station SSID</dt><dd>");
+  page += WiFi.SSID();
+  page += F("</dd>");
+  page += F("<dt>Station IP</dt><dd>");
+  page += WiFi.localIP().toString();
   page += F("</dd>");
   page += F("<dt>Station MAC</dt><dd>");
   page += WiFi.macAddress();
