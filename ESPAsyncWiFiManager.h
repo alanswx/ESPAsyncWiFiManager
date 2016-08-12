@@ -7,6 +7,7 @@
    https://github.com/chriscook8/esp-arduino-apboot
    https://github.com/esp8266/Arduino/tree/esp8266/hardware/esp8266com/esp8266/libraries/DNSServer/examples/CaptivePortalAdvanced
    Built by AlexT https://github.com/tzapu
+   Ported to Async Web Server by https://github.com/alanswx
    Licensed under MIT license
  **************************************************************/
 
@@ -85,8 +86,10 @@ class AsyncWiFiManager
     AsyncWiFiManager(AsyncWebServer * server, DNSServer *dns);
 
     void          scan();
+    String        scanModal();
     void          loop();
-     
+    String        infoAsString();
+
     boolean       autoConnect();
     boolean       autoConnect(char const *apName, char const *apPassword = NULL);
 
@@ -177,6 +180,8 @@ class AsyncWiFiManager
     int           status = WL_IDLE_STATUS;
     int           connectWifi(String ssid, String pass);
     uint8_t       waitForConnectResult();
+    
+	String networkListAsString();
 
     void          handleRoot(AsyncWebServerRequest *);
     void          handleWifi(AsyncWebServerRequest*,boolean scan);

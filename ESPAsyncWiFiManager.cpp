@@ -7,6 +7,7 @@
    https://github.com/chriscook8/esp-arduino-apboot
    https://github.com/esp8266/Arduino/tree/esp8266/hardware/esp8266com/esp8266/libraries/DNSServer/examples/CaptivePortalAdvanced
    Built by AlexT https://github.com/tzapu
+   Ported to Async Web Server by https://github.com/alanswx
    Licensed under MIT license
  **************************************************************/
 
@@ -151,6 +152,44 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
   }
 
   return startConfigPortal(apName, apPassword);
+}
+
+
+String AsyncWiFiManager::networkListAsString()
+{
+	String pager ;
+      //display networks in page
+      for (int i = 0; i < wifiSSIDCount; i++) {
+        if (wifiSSIDs[i].duplicate == true) continue; // skip dups
+        int quality = getRSSIasQuality(wifiSSIDs[i].RSSI);
+
+        if (_minimumQuality == -1 || _minimumQuality < quality) {
+          String item = FPSTR(HTTP_ITEM);
+          String rssiQ;
+          rssiQ += quality;
+          item.replace("{v}", wifiSSIDs[i].SSID);
+          item.replace("{r}", rssiQ);
+          if (wifiSSIDs[i].encryptionType != ENC_TYPE_NONE) {
+            item.replace("{i}", "l");
+          } else {
+            item.replace("{i}", "");
+          }
+          pager += item;
+
+        } else {
+          DEBUG_WM(F("Skipping due to quality"));
+        }
+
+      }
+    return pager;
+}
+
+String AsyncWiFiManager::scanModal()
+{
+	shouldscan=true;
+	scan();
+	String pager=networkListAsString();
+	return pager;
 }
 
 void AsyncWiFiManager::scan()
@@ -556,46 +595,22 @@ void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
   if (scan) {
   wifiSSIDscan=false;
   
-   int n = wifiSSIDCount;
    
   
     DEBUG_WM(F("Scan done"));
-    if (n == 0) {
+    if (wifiSSIDCount==0) {
       DEBUG_WM(F("No networks found"));
       page += F("No networks found. Refresh to scan again.");
     } else {
 
-     
 
       //display networks in page
-      for (int i = 0; i < n; i++) {
-        if (wifiSSIDs[i].duplicate == true) continue; // skip dups
-        DEBUG_WM(wifiSSIDs[i].SSID);
-        
-        DEBUG_WM(wifiSSIDs[i].RSSI);
-        int quality = getRSSIasQuality(wifiSSIDs[i].RSSI);
+      String pager = networkListAsString();
 
-        if (_minimumQuality == -1 || _minimumQuality < quality) {
-          String item = FPSTR(HTTP_ITEM);
-          String rssiQ;
-          rssiQ += quality;
-          item.replace("{v}", wifiSSIDs[i].SSID);
-          item.replace("{r}", rssiQ);
-          if (wifiSSIDs[i].encryptionType != ENC_TYPE_NONE) {
-            item.replace("{i}", "l");
-          } else {
-            item.replace("{i}", "");
-          }
-          //DEBUG_WM(item);
-          page += item;
-          delay(0);
-        } else {
-          DEBUG_WM(F("Skipping due to quality"));
-        }
-
-      }
+      page += pager;
       page += "<br/>";
     }
+    
   }
   wifiSSIDscan=true;
 
@@ -729,24 +744,9 @@ void AsyncWiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
 }
 
 /** Handle the info page */
-void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
-  DEBUG_WM(F("Info"));
-
-  String page = FPSTR(WFM_HTTP_HEAD);
-  page.replace("{v}", "Info");
-  page += FPSTR(HTTP_SCRIPT);
-  page += FPSTR(HTTP_STYLE);
-  page += _customHeadElement;
-  if (connect==true)
-  	page += F("<meta http-equiv=\"refresh\" content=\"5; url=/i\">");
-  page += FPSTR(HTTP_HEAD_END);
-  page += F("<dl>");
-  if (connect==true)
-  {
-  	page += F("<dt>Trying to connect</dt><dd>");
-  	page += WiFi.status();
-  	page += F("</dd>");
-  }
+String AsyncWiFiManager::infoAsString()
+{
+   String page;
   page += F("<dt>Chip ID</dt><dd>");
   page += ESP.getChipId();
   page += F("</dd>");
@@ -775,6 +775,31 @@ void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
   page += WiFi.macAddress();
   page += F("</dd>");
   page += F("</dl>");
+  
+  return page;
+}
+
+void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
+  DEBUG_WM(F("Info"));
+
+  String page = FPSTR(WFM_HTTP_HEAD);
+  page.replace("{v}", "Info");
+  page += FPSTR(HTTP_SCRIPT);
+  page += FPSTR(HTTP_STYLE);
+  page += _customHeadElement;
+  if (connect==true)
+  	page += F("<meta http-equiv=\"refresh\" content=\"5; url=/i\">");
+  page += FPSTR(HTTP_HEAD_END);
+  page += F("<dl>");
+  if (connect==true)
+  {
+  	page += F("<dt>Trying to connect</dt><dd>");
+  	page += WiFi.status();
+  	page += F("</dd>");
+  }
+  
+  String pager = infoAsString();
+  page +=pager;
   page += FPSTR(HTTP_END);
 
   request->send(200, "text/html", page);
