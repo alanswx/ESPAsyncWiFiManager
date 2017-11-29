@@ -1,4 +1,8 @@
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -18,7 +22,7 @@ DNSServer dns;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  
+
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   AsyncWiFiManager wifiManager(&server,&dns);
@@ -37,11 +41,11 @@ void setup() {
     //reset and try again, or maybe put it to deep sleep
     ESP.reset();
     delay(1000);
-  } 
+  }
 
   //if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
- 
+
 }
 
 void loop() {

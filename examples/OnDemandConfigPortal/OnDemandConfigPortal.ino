@@ -1,4 +1,8 @@
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -10,7 +14,7 @@ AsyncWebServer server(80);
 DNSServer dns;
 
 // select wich pin will trigger the configuraton portal when set to LOW
-// ESP-01 users please note: the only pins available (0 and 2), are shared 
+// ESP-01 users please note: the only pins available (0 and 2), are shared
 // with the bootloader, so always set them HIGH at power-up
 #define TRIGGER_PIN 0
 
@@ -30,7 +34,7 @@ void loop() {
     //WiFiManager
     //Local intialization. Once its business is done, there is no need to keep it around
     AsyncWiFiManager wifiManager(&server,&dns);
-    
+
     //reset settings - for testing
     //wifiManager.resetSettings();
 
@@ -45,7 +49,7 @@ void loop() {
 
     //WITHOUT THIS THE AP DOES NOT SEEM TO WORK PROPERLY WITH SDK 1.5 , update to at least 1.5.1
     //WiFi.mode(WIFI_STA);
-    
+
     if (!wifiManager.startConfigPortal("OnDemandAP")) {
       Serial.println("failed to connect and hit timeout");
       delay(3000);

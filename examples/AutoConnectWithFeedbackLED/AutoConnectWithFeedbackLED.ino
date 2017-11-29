@@ -1,4 +1,8 @@
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -32,7 +36,7 @@ DNSServer dns;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  
+
   //set led pin as output
   pinMode(BUILTIN_LED, OUTPUT);
   // start ticker with 0.5 because we start in AP mode and try to connect

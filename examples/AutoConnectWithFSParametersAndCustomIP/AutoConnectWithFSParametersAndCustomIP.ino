@@ -1,6 +1,10 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -10,7 +14,7 @@
 #include <ArduinoJson.h>          //https://github.com/bblanchon/ArduinoJson
 
 //define your default values here, if there are different values in config.json, they are overwritten.
-//length should be max size + 1 
+//length should be max size + 1
 char mqtt_server[40];
 char mqtt_port[6] = "8080";
 char blynk_token[33] = "YOUR_BLYNK_TOKEN";
@@ -116,7 +120,7 @@ void setup() {
   _sn.fromString(static_sn);
 
   wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
-  
+
   //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
@@ -128,7 +132,7 @@ void setup() {
   //set minimu quality of signal so it ignores AP's under that quality
   //defaults to 8%
   wifiManager.setMinimumSignalQuality();
-  
+
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
