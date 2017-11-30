@@ -430,7 +430,12 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 //  }
   //check if we have ssid and pass and force those, if not, try with last saved values
   if (ssid != "") {
-    WiFi.begin(ssid.c_str(), pass.c_str());
+      //trying to fix connection in progress hanging
+      ETS_UART_INTR_DISABLE();
+      wifi_station_disconnect();
+      ETS_UART_INTR_ENABLE();
+
+      WiFi.begin(ssid.c_str(), pass.c_str());
   } else {
     if (WiFi.SSID()) {
       DEBUG_WM("Using last saved values, should be faster");
