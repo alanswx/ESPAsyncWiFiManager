@@ -1,6 +1,10 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -13,7 +17,7 @@ DNSServer dns;
 
 /**************************************************************************************
  * this example shows how to set a static IP configuration for the ESP
- * although the IP shows in the config portal, the changes will revert 
+ * although the IP shows in the config portal, the changes will revert
  * to the IP set in the source file.
  * if you want the ability to configure and persist the new IP configuration
  * look at the FS examples, which save the config to file
@@ -38,7 +42,7 @@ void setup() {
   //reset settings - for testing
   //wifiManager.resetSettings();
 
-  //set static ip 
+  //set static ip
   //the commented bit only works for ESP8266 core 2.1.0 or newer
   /*IPAddress _ip,_gw,_sn;
   _ip.fromString(static_ip);
@@ -48,7 +52,7 @@ void setup() {
   IPAddress _ip = IPAddress(10, 0, 1, 78);
   IPAddress _gw = IPAddress(10, 0, 1, 1);
   IPAddress _sn = IPAddress(255, 255, 255, 0);
-  
+
   wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
 
 

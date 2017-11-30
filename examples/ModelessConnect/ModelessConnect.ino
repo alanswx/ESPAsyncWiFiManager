@@ -1,4 +1,8 @@
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -17,7 +21,7 @@ void setup() {
     //Local intialization. Once its business is done, there is no need to keep it around
     //reset saved settings
     //wifiManager.resetSettings();
-    
+
     //set custom ip for portal
     //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
 
@@ -34,7 +38,7 @@ void setup() {
  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "Hello World");
   });
-    
+
 }
 
 void loop() {

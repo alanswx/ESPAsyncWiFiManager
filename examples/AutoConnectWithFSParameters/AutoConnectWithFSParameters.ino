@@ -1,6 +1,10 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 
+#if defined(ESP8266)
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#else
+#include <WiFi.h>
+#endif
 
 //needed for library
 #include <DNSServer.h>
@@ -89,7 +93,7 @@ void setup() {
 
   //set static ip
   wifiManager.setSTAStaticIPConfig(IPAddress(10,0,1,99), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
-  
+
   //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
@@ -101,7 +105,7 @@ void setup() {
   //set minimu quality of signal so it ignores AP's under that quality
   //defaults to 8%
   //wifiManager.setMinimumSignalQuality();
-  
+
   //sets timeout until configuration portal gets turned off
   //useful to make it all retry or go to sleep
   //in seconds
