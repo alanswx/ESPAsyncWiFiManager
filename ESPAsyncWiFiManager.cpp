@@ -477,12 +477,16 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
   //  }
   //check if we have ssid and pass and force those, if not, try with last saved values
   if (ssid != "") {
-      //trying to fix connection in progress hanging
-      ETS_UART_INTR_DISABLE();
-      wifi_station_disconnect();
-      ETS_UART_INTR_ENABLE();
+  #if defined(ESP8266)
+    //trying to fix connection in progress hanging
+    ETS_UART_INTR_DISABLE();
+    wifi_station_disconnect();
+    ETS_UART_INTR_ENABLE();
+  #else
+    WiFi.disconnect(false);
+  #endif
 
-      WiFi.begin(ssid.c_str(), pass.c_str());
+    WiFi.begin(ssid.c_str(), pass.c_str());
   } else {
     if (WiFi.SSID()) {
       DEBUG_WM("Using last saved values, should be faster");
@@ -492,7 +496,6 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
       wifi_station_disconnect();
       ETS_UART_INTR_ENABLE();
 #else
-      //esp_wifi_disconnect();
       WiFi.disconnect(false);
 #endif
 
