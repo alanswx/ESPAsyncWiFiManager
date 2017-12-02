@@ -88,6 +88,7 @@ class AsyncWiFiManager
     void          scan();
     String        scanModal();
     void          loop();
+    void          criticalLoop();
     String        infoAsString();
 
     boolean       autoConnect();
@@ -111,6 +112,9 @@ class AsyncWiFiManager
     //sets timeout for which to attempt connecting, usefull if you get a lot of failed connects
     void          setConnectTimeout(unsigned long seconds);
 
+    void setDebugOut(Print *printer) {
+    	this->debugOut = printer;
+    }
 
     void          setDebugOutput(boolean debug);
     //defaults to not showing anything under 8% signal quality if called
@@ -142,6 +146,8 @@ class AsyncWiFiManager
     boolean         _modeless;
     int             scannow;
     int             shouldscan;
+    boolean			updateInfo = true;
+    String 			pager;
     
     //const int     WM_DONE                 = 0;
     //const int     WM_WAIT                 = 10;
@@ -212,6 +218,7 @@ class AsyncWiFiManager
 
     AsyncWiFiManagerParameter* _params[WIFI_MANAGER_MAX_PARAMS];
 
+    Print *debugOut;
     template <typename Generic>
     void          DEBUG_WM(Generic text);
 
