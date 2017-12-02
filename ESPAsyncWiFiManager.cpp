@@ -66,6 +66,7 @@ AsyncWiFiManager::AsyncWiFiManager(AsyncWebServer *server, DNSServer *dns) :serv
   wifiSSIDscan=true;
   _modeless=false;
   shouldscan=true;
+  debugOut = &Serial;
 }
 
 void AsyncWiFiManager::addParameter(AsyncWiFiManagerParameter *p) {
@@ -301,46 +302,53 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
 }
 
 void AsyncWiFiManager::loop(){
-    dnsServer->processNextRequest();
-    if (_modeless)
-    {
-		if ( scannow==-1 || millis() > scannow + 60000)
-		{
-		
-		scan();
-		scannow= millis() ;
+	dnsServer->processNextRequest();
+}
+
+void AsyncWiFiManager::criticalLoop(){
+	if (_modeless) {
+		if (updateInfo) {
+			updateInfo = false;
+			pager = infoAsString();
+			status = WiFi.status();
+		}
+
+		if (scannow == -1 || millis() > scannow + 60000) {
+
+			scan();
+			scannow = millis();
 		}
 		if (connect) {
-		  connect = false;
-		  //delay(2000);
-		  DEBUG_WM(F("Connecting to new AP"));
+			connect = false;
+			//delay(2000);
+			DEBUG_WM(F("Connecting to new AP"));
 
-		  // using user-provided  _ssid, _pass in place of system-stored ssid and pass
-		  if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
-			DEBUG_WM(F("Failed to connect."));
-		  } else {
-			//connected
-			// alanswx - should we have a config to decide if we should shut down AP?
-			// WiFi.mode(WIFI_STA);
-			//notify that configuration has changed and any optional parameters should be saved
-			if ( _savecallback != NULL) {
-			  //todo: check if any custom parameters actually exist, and check if they really changed maybe
-			  _savecallback();
+			// using user-provided  _ssid, _pass in place of system-stored ssid and pass
+			if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
+				DEBUG_WM(F("Failed to connect."));
+			} else {
+				//connected
+				// alanswx - should we have a config to decide if we should shut down AP?
+				// WiFi.mode(WIFI_STA);
+				//notify that configuration has changed and any optional parameters should be saved
+				if (_savecallback != NULL) {
+					//todo: check if any custom parameters actually exist, and check if they really changed maybe
+					_savecallback();
+				}
+				return;
 			}
-			return;
-		  }
 
-		  if (_shouldBreakAfterConfig) {
-			//flag set to exit after config after trying to connect
-			//notify that configuration has changed and any optional parameters should be saved
-			if ( _savecallback != NULL) {
-			  //todo: check if any custom parameters actually exist, and check if they really changed maybe
-			  _savecallback();
+			if (_shouldBreakAfterConfig) {
+				//flag set to exit after config after trying to connect
+				//notify that configuration has changed and any optional parameters should be saved
+				if (_savecallback != NULL) {
+					//todo: check if any custom parameters actually exist, and check if they really changed maybe
+					_savecallback();
+				}
+				return;
 			}
-			return;
-		  }
 		}
-   }
+	}
 }
 
 boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPassword) {
@@ -415,7 +423,9 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 
 
 int AsyncWiFiManager::connectWifi(String ssid, String pass) {
-  DEBUG_WM(F("Connecting as wifi client..."));
+	  DEBUG_WM(F("Connecting as wifi client..."));
+	  DEBUG_WM(ssid);
+	  DEBUG_WM(pass);
 
   // check if we've got static_ip settings, if we do, use those.
   if (_sta_static_ip) {
@@ -431,14 +441,19 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
   //check if we have ssid and pass and force those, if not, try with last saved values
   if (ssid != "") {
       //trying to fix connection in progress hanging
-      ETS_UART_INTR_DISABLE();
-      wifi_station_disconnect();
-      ETS_UART_INTR_ENABLE();
+	  if (WiFi.status() == WL_CONNECTED) {
+		  ETS_UART_INTR_DISABLE();
+		  wifi_station_disconnect();
+		  ETS_UART_INTR_ENABLE();
+	  }
 
-      WiFi.begin(ssid.c_str(), pass.c_str());
+      wl_status_t status = WiFi.begin(ssid.c_str(), pass.c_str());
+    DEBUG_WM(status);
   } else {
-    if (WiFi.SSID()) {
+	String currentSSID = WiFi.SSID();
+    if (currentSSID.length() > 0) {
       DEBUG_WM("Using last saved values, should be faster");
+      DEBUG_WM(WiFi.SSID());
       //trying to fix connection in progress hanging
       ETS_UART_INTR_DISABLE();
       wifi_station_disconnect();
@@ -450,6 +465,7 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
     }
   }
 
+  DEBUG_WM ("Waiting for connection: ");
   int connRes = waitForConnectResult();
   DEBUG_WM ("Connection result: ");
   DEBUG_WM ( connRes );
@@ -563,6 +579,8 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
   // and only scan on demand? timer + on demand? plus a link to make it happen?
   shouldscan=true;
   scannow= -1 ;
+  updateInfo = true;
+
   DEBUG_WM(F("Handle root"));
   if (captivePortal(request)) { // If captive portal redirect instead of displaying the page.
     return;
@@ -693,6 +711,8 @@ void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
 void AsyncWiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
   DEBUG_WM(F("WiFi save"));
 
+  updateInfo = true;
+
   //SAVE/connect here
   _ssid = request->arg("s").c_str();
   _pass = request->arg("p").c_str();
@@ -798,13 +818,14 @@ void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
   page += F("<dl>");
   if (connect==true)
   {
+	  DEBUG_WM(F("Calling WiFi.status()"));
+
   	page += F("<dt>Trying to connect</dt><dd>");
-  	page += WiFi.status();
+  	page += status;
   	page += F("</dd>");
   }
   
-  String pager = infoAsString();
-  page +=pager;
+  page += pager;
   page += FPSTR(HTTP_END);
 
   request->send(200, "text/html", page);
@@ -905,8 +926,8 @@ void AsyncWiFiManager::setRemoveDuplicateAPs(boolean removeDuplicates) {
 template <typename Generic>
 void AsyncWiFiManager::DEBUG_WM(Generic text) {
   if (_debug) {
-    Serial.print("*WM: ");
-    Serial.println(text);
+    debugOut->print("*WM: ");
+    debugOut->println(text);
   }
 }
 
