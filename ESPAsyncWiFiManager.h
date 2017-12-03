@@ -98,6 +98,8 @@ public:
   void          scan();
   String        scanModal();
   void          loop();
+  void          safeLoop();
+  void          criticalLoop();
   String        infoAsString();
 
   boolean       autoConnect();
@@ -152,6 +154,7 @@ private:
   boolean         _modeless;
   int             scannow;
   int             shouldscan;
+  boolean         needInfo = true;
 
   //const int     WM_DONE                 = 0;
   //const int     WM_WAIT                 = 10;
@@ -161,6 +164,8 @@ private:
   void          setupConfigPortal();
   void          startWPS();
 
+  String        pager;
+  wl_status_t   wifiStatus;
   const char*   _apName                 = "no-net";
   const char*   _apPassword             = NULL;
   String        _ssid                   = "";
@@ -190,6 +195,7 @@ private:
   int           status = WL_IDLE_STATUS;
   int           connectWifi(String ssid, String pass);
   uint8_t       waitForConnectResult();
+  void          setInfo();
 
   String networkListAsString();
 
