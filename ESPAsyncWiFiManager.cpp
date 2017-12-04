@@ -113,6 +113,8 @@ void AsyncWiFiManager::setupConfigPortal() {
   dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
 
+  setInfo();
+
   /* Setup web pages: root, wifi config pages, SO captive portal detectors and not found. */
   server->on("/", std::bind(&AsyncWiFiManager::handleRoot, this,std::placeholders::_1)).setFilter(ON_AP_FILTER);
   server->on("/wifi", std::bind(&AsyncWiFiManager::handleWifi, this, std::placeholders::_1,true)).setFilter(ON_AP_FILTER);
@@ -151,6 +153,7 @@ static String byteToHexString(uint8_t* buf, uint8_t length, String strSeperator=
   return dataString;
 } // byteToHexString
 
+#if !defined(ESP8266)
 String getESP32ChipID() {
   uint64_t chipid;
   chipid=ESP.getEfuseMac();//The chip ID is essentially its MAC address(length: 6 bytes).
@@ -161,6 +164,7 @@ String getESP32ChipID() {
   }
   return byteToHexString(chipid_arr, chipid_size, "");
 }
+#endif
 
 boolean AsyncWiFiManager::autoConnect() {
   String ssid = "ESP";
@@ -348,46 +352,69 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
 }
 
 void AsyncWiFiManager::loop(){
-  dnsServer->processNextRequest();
+	safeLoop();
+	criticalLoop();
+}
+
+void AsyncWiFiManager::setInfo() {
+	if (needInfo) {
+		pager = infoAsString();
+	    wifiStatus = WiFi.status();
+	    needInfo = false;
+	}
+}
+
+/**
+ * Anything that accesses WiFi, ESP or EEPROM goes here
+ */
+void AsyncWiFiManager::criticalLoop(){
   if (_modeless)
   {
-    if ( scannow==-1 || millis() > scannow + 60000)
-    {
 
-      scan();
-      scannow= millis() ;
-    }
-    if (connect) {
-      connect = false;
-      //delay(2000);
-      DEBUG_WM(F("Connecting to new AP"));
+	if ( scannow==-1 || millis() > scannow + 60000)
+	{
 
-      // using user-provided  _ssid, _pass in place of system-stored ssid and pass
-      if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
-        DEBUG_WM(F("Failed to connect."));
-      } else {
-        //connected
-        // alanswx - should we have a config to decide if we should shut down AP?
-        // WiFi.mode(WIFI_STA);
-        //notify that configuration has changed and any optional parameters should be saved
-        if ( _savecallback != NULL) {
-          //todo: check if any custom parameters actually exist, and check if they really changed maybe
-          _savecallback();
-        }
-        return;
-      }
+	  scan();
+	  scannow= millis() ;
+	}
+	if (connect) {
+		connect = false;
+	  //delay(2000);
+	  DEBUG_WM(F("Connecting to new AP"));
 
-      if (_shouldBreakAfterConfig) {
-        //flag set to exit after config after trying to connect
-        //notify that configuration has changed and any optional parameters should be saved
-        if ( _savecallback != NULL) {
-          //todo: check if any custom parameters actually exist, and check if they really changed maybe
-          _savecallback();
-        }
-        return;
-      }
-    }
+	  // using user-provided  _ssid, _pass in place of system-stored ssid and pass
+	  if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
+		DEBUG_WM(F("Failed to connect."));
+	  } else {
+		//connected
+		// alanswx - should we have a config to decide if we should shut down AP?
+		// WiFi.mode(WIFI_STA);
+		//notify that configuration has changed and any optional parameters should be saved
+		if ( _savecallback != NULL) {
+		  //todo: check if any custom parameters actually exist, and check if they really changed maybe
+		  _savecallback();
+		}
+
+		return;
+	  }
+
+	  if (_shouldBreakAfterConfig) {
+		//flag set to exit after config after trying to connect
+		//notify that configuration has changed and any optional parameters should be saved
+		if ( _savecallback != NULL) {
+		  //todo: check if any custom parameters actually exist, and check if they really changed maybe
+		  _savecallback();
+		}
+	  }
+	}
   }
+}
+
+/*
+ * Anything that doesn't access WiFi, ESP or EEPROM can go here
+ */
+void AsyncWiFiManager::safeLoop(){
+  dnsServer->processNextRequest();
 }
 
 boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPassword) {
@@ -488,7 +515,7 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
     WiFi.begin(ssid.c_str(), pass.c_str());
   } else {
-    if (WiFi.SSID()) {
+    if (WiFi.SSID().length() > 0) {
       DEBUG_WM("Using last saved values, should be faster");
 #if defined(ESP8266)
       //trying to fix connection in progress hanging
@@ -514,6 +541,9 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
     //should be connected at the end of WPS
     connRes = waitForConnectResult();
   }
+
+  needInfo = true;
+  setInfo();
   return connRes;
 }
 
@@ -756,6 +786,7 @@ void AsyncWiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
   DEBUG_WM(F("WiFi save"));
 
   //SAVE/connect here
+  needInfo = true;
   _ssid = request->arg("s").c_str();
   _pass = request->arg("p").c_str();
 
@@ -872,11 +903,10 @@ void AsyncWiFiManager::handleInfo(AsyncWebServerRequest *request) {
   if (connect==true)
   {
     page += F("<dt>Trying to connect</dt><dd>");
-    page += WiFi.status();
+    page += wifiStatus;
     page += F("</dd>");
   }
 
-  String pager = infoAsString();
   page +=pager;
   page += FPSTR(HTTP_END);
 
