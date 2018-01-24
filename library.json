@@ -8,6 +8,6 @@
     "url": "https://github.com/alanswx/ESPAsyncWiFiManager.git"
   },
   "frameworks": "arduino",
-  "platforms": "*"
+  "platforms": ["espressif8266", "espressif32"]
   "version": "0.13"
 }
