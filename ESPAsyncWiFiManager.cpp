@@ -78,6 +78,7 @@ void AsyncWiFiManager::addParameter(AsyncWiFiManagerParameter *p) {
 void AsyncWiFiManager::setupConfigPortal() {
   // dnsServer.reset(new DNSServer());
   // server.reset(new ESP8266WebServer(80));
+  server->reset();
 
   DEBUG_WM(F(""));
   _configPortalStart = millis();
@@ -481,8 +482,8 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
     yield();
   }
 
-  // server.reset();
-  // dnsServer.reset();
+  dnsServer=(new DNSServer());
+  server->reset();
 
   return  WiFi.status() == WL_CONNECTED;
 }
