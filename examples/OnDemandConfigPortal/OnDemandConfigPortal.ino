@@ -5,13 +5,14 @@
 #endif
 
 //needed for library
-#include <DNSServer.h>
+#include <ESPAsyncDNSServer.h>           //https://github.com/devyte/ESPAsyncDNSServer
+                                         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
 
 AsyncWebServer server(80);
-DNSServer dns;
+AsyncDNSServer dns;
 
 // select wich pin will trigger the configuraton portal when set to LOW
 // ESP-01 users please note: the only pins available (0 and 2), are shared

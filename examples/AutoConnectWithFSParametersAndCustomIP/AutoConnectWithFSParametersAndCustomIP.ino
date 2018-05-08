@@ -7,7 +7,8 @@
 #endif
 
 //needed for library
-#include <DNSServer.h>
+#include <ESPAsyncDNSServer.h>           //https://github.com/devyte/ESPAsyncDNSServer
+                                         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
@@ -33,7 +34,7 @@ void saveConfigCallback () {
 }
 
 AsyncWebServer server(80);
-DNSServer dns;
+AsyncDNSServer dns;
 
 void setup() {
   // put your setup code here, to run once:

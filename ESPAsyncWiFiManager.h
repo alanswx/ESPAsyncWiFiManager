@@ -22,7 +22,9 @@
 #define ESP_WPS_MODE WPS_TYPE_PBC
 #endif
 #include <ESPAsyncWebServer.h>
-#include <DNSServer.h>
+//#include <DNSServer.h>
+#include <ESPAsyncDNSServer.h>    //https://github.com/devyte/ESPAsyncDNSServer
+                                  //https://github.com/me-no-dev/ESPAsyncUDP
 #include <memory>
 
 #if defined(ESP8266)
@@ -93,7 +95,7 @@ public:
 class AsyncWiFiManager
 {
 public:
-  AsyncWiFiManager(AsyncWebServer * server, DNSServer *dns);
+  AsyncWiFiManager(AsyncWebServer * server, AsyncDNSServer *dns);
 
   void          scan();
   String        scanModal();
@@ -147,7 +149,7 @@ public:
   void          setRemoveDuplicateAPs(boolean removeDuplicates);
 
 private:
-  DNSServer      *dnsServer;
+  AsyncDNSServer      *dnsServer;
   AsyncWebServer *server;
 
 

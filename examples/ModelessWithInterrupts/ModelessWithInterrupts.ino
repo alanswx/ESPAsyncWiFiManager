@@ -5,12 +5,13 @@
 #endif
 
 //needed for library
-#include <DNSServer.h>
+#include <ESPAsyncDNSServer.h>           //https://github.com/devyte/ESPAsyncDNSServer
+                                         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
 AsyncWebServer server(80);
-DNSServer dns;
+AsyncDNSServer dns;
 AsyncWiFiManager wifiManager(&server,&dns);
 
 volatile boolean guard = true;
@@ -71,7 +72,6 @@ void setup() {
 	timer0_isr_init();
 	timer0_attachInterrupt(interruptFunction);
 	timer0_write(ESP.getCycleCount() + ESP.getCpuFreqMHz() * 1024);	// Wait 2 seconds before displaying
-	updateDisplay = false;
 }
 
 void loop() {
