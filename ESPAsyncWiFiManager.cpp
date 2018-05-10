@@ -61,7 +61,11 @@ const char* AsyncWiFiManagerParameter::getCustomHTML() {
   return _customHTML;
 }
 
+#ifdef USE_EADNS
 AsyncWiFiManager::AsyncWiFiManager(AsyncWebServer *server, AsyncDNSServer *dns) :server(server), dnsServer(dns) {
+#else
+AsyncWiFiManager::AsyncWiFiManager(AsyncWebServer *server, DNSServer *dns) :server(server), dnsServer(dns) {
+#endif
   wifiSSIDs = NULL;
   wifiSSIDscan=true;
   _modeless=false;
@@ -415,7 +419,9 @@ void AsyncWiFiManager::criticalLoop(){
  * Anything that doesn't access WiFi, ESP or EEPROM can go here
  */
 void AsyncWiFiManager::safeLoop(){
-  //dnsServer->processNextRequest();
+  #ifndef USE_EADNS	
+  dnsServer->processNextRequest();
+  #endif
 }
 
 boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPassword) {
@@ -483,8 +489,11 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
   }
 
   server->reset();
-  //dnsServer=DNSServer();
+  #ifdef USE_EADNS
   *dnsServer=AsyncDNSServer();
+  #else
+  *dnsServer=DNSServer();
+  #endif
 
   return  WiFi.status() == WL_CONNECTED;
 }

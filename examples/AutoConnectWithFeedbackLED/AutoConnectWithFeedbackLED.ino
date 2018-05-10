@@ -5,8 +5,6 @@
 #endif
 
 //needed for library
-#include <ESPAsyncDNSServer.h>           //https://github.com/devyte/ESPAsyncDNSServer
-                                         //https://github.com/me-no-dev/ESPAsyncUDP
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
@@ -32,7 +30,7 @@ void configModeCallback (AsyncWiFiManager *myWiFiManager) {
 }
 
 AsyncWebServer server(80);
-AsyncDNSServer dns;
+DNSServer dns;
 
 void setup() {
   // put your setup code here, to run once:
