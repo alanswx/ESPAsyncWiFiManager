@@ -273,7 +273,10 @@ If you connect to the created configuration Access Point but the configuration p
 If trying to connect ends up in an endless loop, try to add `setConnectTimeout(60)` before `autoConnect();`. The parameter is timeout to try connecting in seconds.
 
 ## Releases
-#### 0.12
+##### 0.15
+- fixed: connection with saved credentials
+
+##### 0.12
 - removed 204 header response
 - fixed incompatibility with other libs using isnan and other std:: functions without namespace
 
