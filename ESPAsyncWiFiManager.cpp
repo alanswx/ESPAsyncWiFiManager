@@ -529,7 +529,8 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
       WiFi.begin();
     } else {
-      DEBUG_WM("No saved credentials");
+      DEBUG_WM("Try to connect with saved credentials");
+      WiFi.begin();
     }
   }
 
