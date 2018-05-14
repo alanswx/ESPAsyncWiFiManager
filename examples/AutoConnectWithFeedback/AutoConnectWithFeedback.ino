@@ -5,7 +5,6 @@
 #endif
 
 //needed for library
-#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 

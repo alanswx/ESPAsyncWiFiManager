@@ -5,7 +5,6 @@
 #endif
 
 //needed for library
-#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
@@ -71,7 +70,6 @@ void setup() {
 	timer0_isr_init();
 	timer0_attachInterrupt(interruptFunction);
 	timer0_write(ESP.getCycleCount() + ESP.getCpuFreqMHz() * 1024);	// Wait 2 seconds before displaying
-	updateDisplay = false;
 }
 
 void loop() {
