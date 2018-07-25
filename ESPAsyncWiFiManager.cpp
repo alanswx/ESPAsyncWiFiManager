@@ -587,7 +587,15 @@ void AsyncWiFiManager::startWPS() {
 #if defined(ESP8266)
   WiFi.beginWPSConfig();
 #else
-  esp_wps_config_t config = WPS_CONFIG_INIT_DEFAULT(ESP_WPS_MODE);
+  //esp_wps_config_t config = WPS_CONFIG_INIT_DEFAULT(ESP_WPS_MODE);
+  esp_wps_config_t config = {};
+  config.wps_type = ESP_WPS_MODE;
+  config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+  strcpy(config.factory_info.manufacturer,"ESPRESSIF");  
+  strcpy(config.factory_info.model_number, "ESP32");  
+  strcpy(config.factory_info.model_name, "ESPRESSIF IOT");  
+  strcpy(config.factory_info.device_name,"ESP STATION");  
+
   esp_wifi_wps_enable(&config);
   esp_wifi_wps_start(0);
 #endif
