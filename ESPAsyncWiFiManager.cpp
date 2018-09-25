@@ -442,7 +442,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
   scannow= -1 ;
   while (_configPortalTimeout == 0 || millis() < _configPortalStart + _configPortalTimeout) {
     //DNS
-    //dnsServer->processNextRequest();
+    dnsServer->processNextRequest();
 
     //
     //  we should do a scan every so often here
