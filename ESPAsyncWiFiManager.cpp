@@ -548,12 +548,13 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
   DEBUG_WM ("Connection result: ");
   DEBUG_WM ( connRes );
   //not connected, WPS enabled, no pass - first attempt
+#ifdef NO_EXTRA_4K_HEAP	
   if (_tryWPS && connRes != WL_CONNECTED && pass == "") {
     startWPS();
     //should be connected at the end of WPS
     connRes = waitForConnectResult();
   }
-
+#endif
   needInfo = true;
   setInfo();
   return connRes;
@@ -581,7 +582,7 @@ uint8_t AsyncWiFiManager::waitForConnectResult() {
     return status;
   }
 }
-
+#ifdef NO_EXTRA_4K_HEAP
 void AsyncWiFiManager::startWPS() {
   DEBUG_WM("START WPS");
 #if defined(ESP8266)
@@ -602,6 +603,7 @@ void AsyncWiFiManager::startWPS() {
   DEBUG_WM("END WPS");
 
 }
+#endif
 /*
 String AsyncWiFiManager::getSSID() {
 if (_ssid == "") {
