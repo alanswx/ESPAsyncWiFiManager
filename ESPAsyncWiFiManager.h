@@ -141,7 +141,7 @@ public:
   //sets a custom ip /gateway /subnet configuration
   void          setAPStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn);
   //sets config for a static IP
-  void          setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn);
+  void          setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn, IPAddress dns1=(uint32_t)0x00000000, IPAddress dns2=(uint32_t)0x00000000);
   //called when AP mode and config portal is started
   void          setAPCallback( void (*func)(AsyncWiFiManager*) );
   //called when settings have been changed and connection was successful
@@ -177,8 +177,9 @@ private:
   //const String  HTTP_HEAD = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>{v}</title>";
 
   void          setupConfigPortal();
+#ifdef NO_EXTRA_4K_HEAP
   void          startWPS();
-
+#endif
   String        pager;
   wl_status_t   wifiStatus;
   const char*   _apName                 = "no-net";
@@ -195,13 +196,16 @@ private:
   IPAddress     _sta_static_ip;
   IPAddress     _sta_static_gw;
   IPAddress     _sta_static_sn;
+  IPAddress     _sta_static_dns1= (uint32_t)0x00000000;
+  IPAddress     _sta_static_dns2= (uint32_t)0x00000000;
 
   int           _paramsCount            = 0;
   int           _minimumQuality         = -1;
   boolean       _removeDuplicateAPs     = true;
   boolean       _shouldBreakAfterConfig = false;
+#ifdef NO_EXTRA_4K_HEAP
   boolean       _tryWPS                 = false;
-
+#endif
   const char*   _customHeadElement      = "";
 
   //String        getEEPROMString(int start, int len);

@@ -508,8 +508,8 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
   // check if we've got static_ip settings, if we do, use those.
   if (_sta_static_ip) {
-    DEBUG_WM(F("Custom STA IP/GW/Subnet"));
-    WiFi.config(_sta_static_ip, _sta_static_gw, _sta_static_sn);
+    DEBUG_WM(F("Custom STA IP/GW/Subnet/DNS"));
+    WiFi.config(_sta_static_ip, _sta_static_gw, _sta_static_sn, _sta_static_dns1, _sta_static_dns2);
     DEBUG_WM(WiFi.localIP());
   }
   //fix for auto connect racing issue
@@ -543,7 +543,8 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
       WiFi.begin();
     } else {
-      DEBUG_WM("No saved credentials");
+      DEBUG_WM("Try to connect with saved credentials");
+      WiFi.begin();
     }
   }
 
@@ -551,12 +552,13 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
   DEBUG_WM ("Connection result: ");
   DEBUG_WM ( connRes );
   //not connected, WPS enabled, no pass - first attempt
+#ifdef NO_EXTRA_4K_HEAP	
   if (_tryWPS && connRes != WL_CONNECTED && pass == "") {
     startWPS();
     //should be connected at the end of WPS
     connRes = waitForConnectResult();
   }
-
+#endif
   needInfo = true;
   setInfo();
   return connRes;
@@ -584,19 +586,28 @@ uint8_t AsyncWiFiManager::waitForConnectResult() {
     return status;
   }
 }
-
+#ifdef NO_EXTRA_4K_HEAP
 void AsyncWiFiManager::startWPS() {
   DEBUG_WM("START WPS");
 #if defined(ESP8266)
   WiFi.beginWPSConfig();
 #else
-  esp_wps_config_t config = WPS_CONFIG_INIT_DEFAULT(ESP_WPS_MODE);
+  //esp_wps_config_t config = WPS_CONFIG_INIT_DEFAULT(ESP_WPS_MODE);
+  esp_wps_config_t config = {};
+  config.wps_type = ESP_WPS_MODE;
+  config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+  strcpy(config.factory_info.manufacturer,"ESPRESSIF");  
+  strcpy(config.factory_info.model_number, "ESP32");  
+  strcpy(config.factory_info.model_name, "ESPRESSIF IOT");  
+  strcpy(config.factory_info.device_name,"ESP STATION");  
+
   esp_wifi_wps_enable(&config);
   esp_wifi_wps_start(0);
 #endif
   DEBUG_WM("END WPS");
 
 }
+#endif
 /*
 String AsyncWiFiManager::getSSID() {
 if (_ssid == "") {
@@ -650,10 +661,12 @@ void AsyncWiFiManager::setAPStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress
   _ap_static_sn = sn;
 }
 
-void AsyncWiFiManager::setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn) {
+void AsyncWiFiManager::setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn, IPAddress dns1, IPAddress dns2) {
   _sta_static_ip = ip;
   _sta_static_gw = gw;
   _sta_static_sn = sn;
+  _sta_static_dns1 = dns1;
+  _sta_static_dns2 = dns2;
 }
 
 void AsyncWiFiManager::setMinimumSignalQuality(int quality) {
@@ -782,6 +795,24 @@ void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
 
     page += item;
 
+    item = FPSTR(HTTP_FORM_PARAM);
+    item.replace("{i}", "dns1");
+    item.replace("{n}", "dns1");
+    item.replace("{p}", "DNS1");
+    item.replace("{l}", "15");
+    item.replace("{v}", _sta_static_dns1.toString());
+
+    page += item;
+
+    item = FPSTR(HTTP_FORM_PARAM);
+    item.replace("{i}", "dns2");
+    item.replace("{n}", "dns2");
+    item.replace("{p}", "DNS2");
+    item.replace("{l}", "15");
+    item.replace("{v}", _sta_static_dns2.toString());
+
+    page += item;
+
     page += "<br/>";
   }
 
@@ -837,6 +868,18 @@ void AsyncWiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
     DEBUG_WM(request->arg("sn"));
     String sn = request->arg("sn");
     optionalIPFromString(&_sta_static_sn, sn.c_str());
+  }
+  if (request->hasArg("dns1")) {
+    DEBUG_WM(F("static DNS 1"));
+    DEBUG_WM(request->arg("dns1"));
+    String dns1 = request->arg("dns1");
+    optionalIPFromString(&_sta_static_dns1, dns1.c_str());
+  }
+  if (request->hasArg("dns2")) {
+    DEBUG_WM(F("static DNS 2"));
+    DEBUG_WM(request->arg("dns2"));
+    String dns2 = request->arg("dns2");
+    optionalIPFromString(&_sta_static_dns2, dns2.c_str());
   }
 
   String page = FPSTR(WFM_HTTP_HEAD);
