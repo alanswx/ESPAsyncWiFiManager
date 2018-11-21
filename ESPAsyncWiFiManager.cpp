@@ -115,7 +115,11 @@ void AsyncWiFiManager::setupConfigPortal() {
   DEBUG_WM(WiFi.softAPIP());
 
   /* Setup the DNS server redirecting all the domains to the apIP */
+  #ifdef USE_EADNS
+  dnsServer->setErrorReplyCode(AsyncDNSReplyCode::NoError);
+  #else
   dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
+  #endif
   dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
 
   setInfo();
