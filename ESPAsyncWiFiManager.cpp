@@ -115,7 +115,11 @@ void AsyncWiFiManager::setupConfigPortal() {
   DEBUG_WM(WiFi.softAPIP());
 
   /* Setup the DNS server redirecting all the domains to the apIP */
+  #ifdef USE_EADNS
+  dnsServer->setErrorReplyCode(AsyncDNSReplyCode::NoError);
+  #else
   dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
+  #endif
   dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
 
   setInfo();
@@ -442,8 +446,10 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
   scannow= -1 ;
   while (_configPortalTimeout == 0 || millis() < _configPortalStart + _configPortalTimeout) {
     //DNS
-    //dnsServer->processNextRequest();
-
+    #ifndef USE_EADNS	
+    dnsServer->processNextRequest();
+    #endif
+	
     //
     //  we should do a scan every so often here
     //
