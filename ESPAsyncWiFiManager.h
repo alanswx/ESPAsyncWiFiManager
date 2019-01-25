@@ -32,6 +32,13 @@
 #endif
 #include <memory>
 
+// fix crash on ESP32 (see https://github.com/alanswx/ESPAsyncWiFiManager/issues/44)
+#if defined(ESP8266)
+typedef int wifi_ssid_count_t;
+#else
+typedef int16_t wifi_ssid_count_t;
+#endif
+
 #if defined(ESP8266)
 extern "C" {
   #include "user_interface.h"
@@ -158,12 +165,12 @@ public:
   void          setRemoveDuplicateAPs(boolean removeDuplicates);
 
 private:
+  AsyncWebServer *server;
   #ifdef USE_EADNS
   AsyncDNSServer      *dnsServer;
   #else
   DNSServer      *dnsServer;
   #endif
-  AsyncWebServer *server;
 
 
   boolean         _modeless;
@@ -238,9 +245,9 @@ private:
   boolean       connect;
   boolean       _debug = true;
 
-  WiFiResult    *wifiSSIDs;
-  int           wifiSSIDCount;
-  boolean       wifiSSIDscan;
+  WiFiResult          *wifiSSIDs;
+  wifi_ssid_count_t   wifiSSIDCount;
+  boolean             wifiSSIDscan;
 
   void (*_apcallback)(AsyncWiFiManager*) = NULL;
   void (*_savecallback)(void) = NULL;
