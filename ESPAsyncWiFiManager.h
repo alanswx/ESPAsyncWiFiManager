@@ -120,8 +120,8 @@ public:
   void          criticalLoop();
   String        infoAsString();
 
-  boolean       autoConnect();
-  boolean       autoConnect(char const *apName, char const *apPassword = NULL);
+  boolean       autoConnect(unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
+  boolean       autoConnect(char const *apName, char const *apPassword = NULL, unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
 
   //if you want to always start the config portal, without trying to connect first
   boolean       startConfigPortal(char const *apName, char const *apPassword = NULL);
@@ -140,6 +140,10 @@ public:
 
   //sets timeout for which to attempt connecting, usefull if you get a lot of failed connects
   void          setConnectTimeout(unsigned long seconds);
+
+  //wether or not the wifi manager tries to connect to configured access point even when
+  //configuration portal (ESP as access point) is running [default true/on]
+  void          setTryConnectDuringConfigPortal(boolean v);
 
 
   void          setDebugOutput(boolean debug);
@@ -248,6 +252,8 @@ private:
   WiFiResult          *wifiSSIDs;
   wifi_ssid_count_t   wifiSSIDCount;
   boolean             wifiSSIDscan;
+
+  boolean             _tryConnectDuringConfigPortal = true;
 
   void (*_apcallback)(AsyncWiFiManager*) = NULL;
   void (*_savecallback)(void) = NULL;

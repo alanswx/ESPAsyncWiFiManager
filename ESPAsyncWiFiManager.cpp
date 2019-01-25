@@ -175,7 +175,7 @@ String getESP32ChipID() {
 }
 #endif
 
-boolean AsyncWiFiManager::autoConnect() {
+boolean AsyncWiFiManager::autoConnect(unsigned long maxConnectRetries, unsigned long retryDelayMs) {
   String ssid = "ESP";
   #if defined(ESP8266)
   ssid += String(ESP.getChipId());
@@ -185,9 +185,8 @@ boolean AsyncWiFiManager::autoConnect() {
   return autoConnect(ssid.c_str(), NULL);
 }
 
-boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword) {
+boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword, unsigned long maxConnectRetries, unsigned long retryDelayMs) {
   DEBUG_WM(F(""));
-  DEBUG_WM(F("AutoConnect"));
 
   // read eeprom for ssid and pass
   //String ssid = getSSID();
@@ -196,12 +195,22 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
   // attempt to connect; should it fail, fall back to AP
   WiFi.mode(WIFI_STA);
 
-  if (connectWifi("", "") == WL_CONNECTED)   {
-    DEBUG_WM(F("IP Address:"));
-    DEBUG_WM(WiFi.localIP());
-    //connected
-    return true;
+  for(unsigned long tryNumber = 0; tryNumber < maxConnectRetries; tryNumber++) {
+	  DEBUG_WM(F("AutoConnect Try No.:"));
+	  DEBUG_WM(tryNumber);
+
+	  if (connectWifi("", "") == WL_CONNECTED)   {
+		  DEBUG_WM(F("IP Address:"));
+		  DEBUG_WM(WiFi.localIP());
+		  //connected
+		  return true;
+	  }
+
+	  if(tryNumber + 1 < maxConnectRetries) {
+		  delay(retryDelayMs);
+	  }
   }
+
 
   return startConfigPortal(apName, apPassword);
 }
@@ -465,7 +474,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       shouldscan=true;  // since we are modal, we can scan every time
       WiFi.disconnect(); // we might still be connecting, so that has to stop for scanning
       scan();
-      WiFi.begin(); // try to reconnect to AP
+      if(_tryConnectDuringConfigPortal) WiFi.begin(); // try to reconnect to AP
       scannow= millis() ;
     }
 
@@ -672,6 +681,10 @@ void AsyncWiFiManager::setConfigPortalTimeout(unsigned long seconds) {
 
 void AsyncWiFiManager::setConnectTimeout(unsigned long seconds) {
   _connectTimeout = seconds * 1000;
+}
+
+void AsyncWiFiManager::setTryConnectDuringConfigPortal(boolean v) {
+  _tryConnectDuringConfigPortal = v;
 }
 
 void AsyncWiFiManager::setDebugOutput(boolean debug) {
