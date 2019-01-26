@@ -175,7 +175,7 @@ String getESP32ChipID() {
 }
 #endif
 
-boolean AsyncWiFiManager::autoConnect() {
+boolean AsyncWiFiManager::autoConnect(unsigned long maxConnectRetries, unsigned long retryDelayMs) {
   String ssid = "ESP";
   #if defined(ESP8266)
   ssid += String(ESP.getChipId());
@@ -185,9 +185,8 @@ boolean AsyncWiFiManager::autoConnect() {
   return autoConnect(ssid.c_str(), NULL);
 }
 
-boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword) {
+boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword, unsigned long maxConnectRetries, unsigned long retryDelayMs) {
   DEBUG_WM(F(""));
-  DEBUG_WM(F("AutoConnect"));
 
   // read eeprom for ssid and pass
   //String ssid = getSSID();
@@ -196,12 +195,22 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
   // attempt to connect; should it fail, fall back to AP
   WiFi.mode(WIFI_STA);
 
-  if (connectWifi("", "") == WL_CONNECTED)   {
-    DEBUG_WM(F("IP Address:"));
-    DEBUG_WM(WiFi.localIP());
-    //connected
-    return true;
+  for(unsigned long tryNumber = 0; tryNumber < maxConnectRetries; tryNumber++) {
+	  DEBUG_WM(F("AutoConnect Try No.:"));
+	  DEBUG_WM(tryNumber);
+
+	  if (connectWifi("", "") == WL_CONNECTED)   {
+		  DEBUG_WM(F("IP Address:"));
+		  DEBUG_WM(WiFi.localIP());
+		  //connected
+		  return true;
+	  }
+
+	  if(tryNumber + 1 < maxConnectRetries) {
+		  delay(retryDelayMs);
+	  }
   }
+
 
   return startConfigPortal(apName, apPassword);
 }
@@ -259,9 +268,15 @@ void AsyncWiFiManager::scan()
 
   if (wifiSSIDscan)
   {
-    int n = WiFi.scanNetworks();
+    wifi_ssid_count_t n = WiFi.scanNetworks();
     DEBUG_WM(F("Scan done"));
-    if (n == 0) {
+	if(n == WIFI_SCAN_FAILED) {
+      DEBUG_WM(F("scanNetworks returned: WIFI_SCAN_FAILED!"));
+	} else if(n == WIFI_SCAN_RUNNING) {
+      DEBUG_WM(F("scanNetworks returned: WIFI_SCAN_RUNNING!"));
+	} else if(n < 0) {
+      DEBUG_WM(F("scanNetworks failed with unknown error code!"));
+	} else if (n == 0) {
       DEBUG_WM(F("No networks found"));
       // page += F("No networks found. Refresh to scan again.");
     } else {
@@ -277,7 +292,7 @@ void AsyncWiFiManager::scan()
         if (n>0)
         shouldscan=false;
 
-        for (int i=0;i<n;i++)
+        for (wifi_ssid_count_t i=0;i<n;i++)
         {
           wifiSSIDs[i].duplicate=false;
 
@@ -382,7 +397,6 @@ void AsyncWiFiManager::criticalLoop(){
 
 	if ( scannow==-1 || millis() > scannow + 60000)
 	{
-
 	  scan();
 	  scannow= millis() ;
 	}
@@ -451,15 +465,30 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
     #endif
 	
     //
-    //  we should do a scan every so often here
+    //  we should do a scan every so often here and
+    //  try to reconnect to AP while we are at it
     //
-    if ( millis() > scannow + 10000)
+    if ( scannow == -1 || millis() > scannow + 10000)
     {
       DEBUG_WM(F("About to scan()"));
       shouldscan=true;  // since we are modal, we can scan every time
+      WiFi.disconnect(); // we might still be connecting, so that has to stop for scanning
       scan();
+      if(_tryConnectDuringConfigPortal) WiFi.begin(); // try to reconnect to AP
       scannow= millis() ;
     }
+
+	// attempts to reconnect were successful
+	if(WiFi.status() == WL_CONNECTED) {
+		//connected
+		WiFi.mode(WIFI_STA);
+		//notify that configuration has changed and any optional parameters should be saved
+		if ( _savecallback != NULL) {
+			//todo: check if any custom parameters actually exist, and check if they really changed maybe
+			_savecallback();
+		}
+		break;
+	}
 
 
     if (connect) {
@@ -468,9 +497,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       DEBUG_WM(F("Connecting to new AP"));
 
       // using user-provided  _ssid, _pass in place of system-stored ssid and pass
-      if (connectWifi(_ssid, _pass) != WL_CONNECTED) {
-        DEBUG_WM(F("Failed to connect."));
-      } else {
+      if (connectWifi(_ssid, _pass) == WL_CONNECTED) {
         //connected
         WiFi.mode(WIFI_STA);
         //notify that configuration has changed and any optional parameters should be saved
@@ -479,6 +506,8 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
           _savecallback();
         }
         break;
+      } else {
+        DEBUG_WM(F("Failed to connect."));
       }
 
       if (_shouldBreakAfterConfig) {
@@ -532,6 +561,7 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
     WiFi.begin(ssid.c_str(), pass.c_str());
   } else {
+
     if (WiFi.SSID().length() > 0) {
       DEBUG_WM("Using last saved values, should be faster");
 #if defined(ESP8266)
@@ -651,6 +681,10 @@ void AsyncWiFiManager::setConfigPortalTimeout(unsigned long seconds) {
 
 void AsyncWiFiManager::setConnectTimeout(unsigned long seconds) {
   _connectTimeout = seconds * 1000;
+}
+
+void AsyncWiFiManager::setTryConnectDuringConfigPortal(boolean v) {
+  _tryConnectDuringConfigPortal = v;
 }
 
 void AsyncWiFiManager::setDebugOutput(boolean debug) {
