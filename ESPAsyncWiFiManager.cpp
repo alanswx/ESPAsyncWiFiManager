@@ -207,7 +207,20 @@ boolean AsyncWiFiManager::autoConnect(char const *apName, char const *apPassword
 	  }
 
 	  if(tryNumber + 1 < maxConnectRetries) {
-		  delay(retryDelayMs);
+
+		  // we might connect during the delay
+		  unsigned long restDelayMs = retryDelayMs;
+		  while(restDelayMs != 0) {
+			  if(WiFi.status() == WL_CONNECTED) {
+				  DEBUG_WM(F("IP Address (connected during delay):"));
+				  DEBUG_WM(WiFi.localIP());
+				  return true;
+			  }
+			  unsigned long thisDelay = std::min(restDelayMs, 100ul);
+			  delay(thisDelay);
+			  restDelayMs -= thisDelay;
+		  }
+
 	  }
   }
 
