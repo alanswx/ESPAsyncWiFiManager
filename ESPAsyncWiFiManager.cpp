@@ -371,8 +371,10 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
     DEBUG_WM(WiFi.localIP());
     //connected
     // call the callback!
-    _savecallback();
-
+	if ( _savecallback != NULL) {
+	  //todo: check if any custom parameters actually exist, and check if they really changed maybe
+	  _savecallback();
+	}
   }
 
 
@@ -759,6 +761,8 @@ void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request,boolean scan) {
   shouldscan=true;
   scannow= -1 ;
 
+  DEBUG_WM(F("Handle wifi"));
+
   String page = FPSTR(WFM_HTTP_HEAD);
   page.replace("{v}", "Config ESP");
   page += FPSTR(HTTP_SCRIPT);
@@ -1059,6 +1063,7 @@ request->send ( 204, "text/plain", "");
 }*/
 
 void AsyncWiFiManager::handleNotFound(AsyncWebServerRequest *request) {
+  DEBUG_WM(F("Handle not found"));
   if (captivePortal(request)) { // If captive portal redirect instead of displaying the error page.
     return;
   }

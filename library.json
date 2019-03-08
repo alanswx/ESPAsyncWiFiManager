@@ -1,5 +1,5 @@
 {
-  "name": "ESPAsyncWifiManager",
+  "name": "ESPAsyncWiFiManager",
   "keywords": "wifi, wi-fi",
   "description": "ESP8266 Async WiFi Connection manager with fallback web configuration portal",
   "repository":
