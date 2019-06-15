@@ -167,6 +167,8 @@ public:
   void          setCustomHeadElement(const char* element);
   //if this is true, remove duplicated Access Points - defaut true
   void          setRemoveDuplicateAPs(boolean removeDuplicates);
+  //sets a custom element to add to options page
+  void          setCustomOptionsElement(const char* element);
 
 private:
   AsyncWebServer *server;
@@ -218,6 +220,7 @@ private:
   boolean       _tryWPS                 = false;
 #endif
   const char*   _customHeadElement      = "";
+  const char*   _customOptionsElement   = "";
 
   //String        getEEPROMString(int start, int len);
   //void          setEEPROMString(int start, int len, String string);

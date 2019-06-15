@@ -750,6 +750,7 @@ void AsyncWiFiManager::handleRoot(AsyncWebServerRequest *request) {
   page += "</h1>";
   page += F("<h3>AsyncWiFiManager</h3>");
   page += FPSTR(HTTP_PORTAL_OPTIONS);
+  page += _customOptionsElement;
   page += FPSTR(HTTP_END);
 
   request->send(200, "text/html", page);
@@ -1112,6 +1113,11 @@ void AsyncWiFiManager::setSaveConfigCallback( void (*func)(void) ) {
 //sets a custom element to add to head, like a new style tag
 void AsyncWiFiManager::setCustomHeadElement(const char* element) {
   _customHeadElement = element;
+}
+
+//sets a custom element to add to options page
+void AsyncWiFiManager::setCustomOptionsElement(const char* element) {
+  _customOptionsElement = element;
 }
 
 //if this is true, remove duplicated Access Points - defaut true
