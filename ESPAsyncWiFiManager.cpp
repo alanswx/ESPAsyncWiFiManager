@@ -496,12 +496,16 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       WiFi.disconnect (false);
     #endif
       scan();
-      if(_tryConnectDuringConfigPortal) WiFi.begin(); // try to reconnect to AP
+	  bool connectedDuringConfigPortal = false;
+      if(_tryConnectDuringConfigPortal) {
+		  WiFi.begin(); // try to reconnect to AP
+		  connectedDuringConfigPortal = true;
+	  }
       scannow= millis() ;
     }
 
-	// attempts to reconnect were successful
-	if(WiFi.status() == WL_CONNECTED) {
+	// attempts to reconnect were successful unless just connected using stored values
+	if(!connectedDuringConfigPortal && WiFi.status() == WL_CONNECTED &&) {
 		//connected
 		WiFi.mode(WIFI_STA);
 		//notify that configuration has changed and any optional parameters should be saved
