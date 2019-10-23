@@ -504,7 +504,8 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       scannow= millis() ;
     }
 
-	// attempts to reconnect were successful unless just connected using stored values
+	// attempts to reconnect were successful 
+	// configuraton should not be saved when just connected using stored ssid and password
 	if(!connectedDuringConfigPortal && WiFi.status() == WL_CONNECTED &&) {
 		//connected
 		WiFi.mode(WIFI_STA);
