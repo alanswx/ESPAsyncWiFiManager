@@ -355,6 +355,7 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
   _modeless =true;
   _apName = apName;
   _apPassword = apPassword;
+  _shouldSaveConfig = false;
 
   /*
   AJS - do we want this?
@@ -370,11 +371,12 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
     DEBUG_WM(F("IP Address:"));
     DEBUG_WM(WiFi.localIP());
     //connected
-    // call the callback!
-	if ( _savecallback != NULL) {
+    // call the callback! // gmag11: Should callback be called here?
+	//_shouldSaveConfig = true;
+	/*if ( _savecallback != NULL) {
 	  //todo: check if any custom parameters actually exist, and check if they really changed maybe
 	  _savecallback();
-	}
+	}*/
   }
 
 
@@ -428,6 +430,7 @@ void AsyncWiFiManager::criticalLoop(){
 		// alanswx - should we have a config to decide if we should shut down AP?
 		// WiFi.mode(WIFI_STA);
 		//notify that configuration has changed and any optional parameters should be saved
+		_shouldSaveConfig = true;
 		if ( _savecallback != NULL) {
 		  //todo: check if any custom parameters actually exist, and check if they really changed maybe
 		  _savecallback();
@@ -439,6 +442,7 @@ void AsyncWiFiManager::criticalLoop(){
 	  if (_shouldBreakAfterConfig) {
 		//flag set to exit after config after trying to connect
 		//notify that configuration has changed and any optional parameters should be saved
+		_shouldSaveConfig = true;
 		if ( _savecallback != NULL) {
 		  //todo: check if any custom parameters actually exist, and check if they really changed maybe
 		  _savecallback();
@@ -462,6 +466,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
   WiFi.mode(WIFI_AP_STA);
   DEBUG_WM("SET AP STA");
 
+  _shouldSaveConfig = false;
   _apName = apName;
   _apPassword = apPassword;
 
@@ -505,6 +510,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 		//connected
 		WiFi.mode(WIFI_STA);
 		//notify that configuration has changed and any optional parameters should be saved
+		_shouldSaveConfig = true;
 		if ( _savecallback != NULL) {
 			//todo: check if any custom parameters actually exist, and check if they really changed maybe
 			_savecallback();
@@ -533,6 +539,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       }
 
       if (_shouldBreakAfterConfig) {
+		_shouldSaveConfig = true;
         //flag set to exit after config after trying to connect
         //notify that configuration has changed and any optional parameters should be saved
         if ( _savecallback != NULL) {
