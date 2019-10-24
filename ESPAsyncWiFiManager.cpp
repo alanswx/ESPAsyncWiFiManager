@@ -371,12 +371,12 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
     DEBUG_WM(F("IP Address:"));
     DEBUG_WM(WiFi.localIP());
     //connected
-    // call the callback! // gmag11: Should callback be called here?
-	//_shouldSaveConfig = true;
-	/*if ( _savecallback != NULL) {
+    // call the callback!
+	_shouldSaveConfig = true;
+	if ( _savecallback != NULL) {
 	  //todo: check if any custom parameters actually exist, and check if they really changed maybe
 	  _savecallback();
-	}*/
+	}
   }
 
 
