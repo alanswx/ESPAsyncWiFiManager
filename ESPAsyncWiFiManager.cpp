@@ -464,6 +464,7 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 
   _apName = apName;
   _apPassword = apPassword;
+  bool connectedDuringConfigPortal = false;
 
   //notify we entered AP mode
   if ( _apcallback != NULL) {
@@ -496,7 +497,6 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
       WiFi.disconnect (false);
     #endif
       scan();
-	  bool connectedDuringConfigPortal = false;
       if(_tryConnectDuringConfigPortal) {
 		  WiFi.begin(); // try to reconnect to AP
 		  connectedDuringConfigPortal = true;
@@ -506,11 +506,11 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
 
 	// attempts to reconnect were successful 
 	// configuraton should not be saved when just connected using stored ssid and password
-	if(!connectedDuringConfigPortal && WiFi.status() == WL_CONNECTED &&) {
 		//connected
+	if (WiFi.status () == WL_CONNECTED) {
 		WiFi.mode(WIFI_STA);
 		//notify that configuration has changed and any optional parameters should be saved
-		if ( _savecallback != NULL) {
+		if (!connectedDuringConfigPortal && _savecallback != NULL) {
 			//todo: check if any custom parameters actually exist, and check if they really changed maybe
 			_savecallback();
 		}
