@@ -487,7 +487,14 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
     {
       DEBUG_WM(F("About to scan()"));
       shouldscan=true;  // since we are modal, we can scan every time
-      WiFi.disconnect(); // we might still be connecting, so that has to stop for scanning
+    #if defined(ESP8266)
+      // we might still be connecting, so that has to stop for scanning
+      ETS_UART_INTR_DISABLE ();
+      wifi_station_disconnect ();
+      ETS_UART_INTR_ENABLE ();
+    #else
+      WiFi.disconnect (false);
+    #endif
       scan();
       if(_tryConnectDuringConfigPortal) WiFi.begin(); // try to reconnect to AP
       scannow= millis() ;
