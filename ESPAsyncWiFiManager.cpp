@@ -690,7 +690,7 @@ String AsyncWiFiManager::getConfigPortalSSID() {
 void AsyncWiFiManager::resetSettings() {
   DEBUG_WM(F("settings invalidated"));
   DEBUG_WM(F("THIS MAY CAUSE AP NOT TO START UP PROPERLY. YOU NEED TO COMMENT IT OUT AFTER ERASING THE DATA."));
-  WiFi.disconnect(true);
+  WiFi.disconnect(true, true);
   //delay(200);
 }
 void AsyncWiFiManager::setTimeout(unsigned long seconds) {
