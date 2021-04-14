@@ -120,7 +120,9 @@ void AsyncWiFiManager::setupConfigPortal() {
   #else
   dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
   #endif
-  dnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
+  if (!dnsServer->start(DNS_PORT, "*", WiFi.softAPIP())) {
+    DEBUG_WM(F("Could not start Captive DNS Server!"));
+  }
 
   setInfo();
 
@@ -545,12 +547,8 @@ boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apP
   }
 
   server->reset();
-  #ifdef USE_EADNS
-  *dnsServer=AsyncDNSServer();
-  #else
-  *dnsServer=DNSServer();
-  #endif
-
+  dnsServer->stop();
+  
   return  WiFi.status() == WL_CONNECTED;
 }
 
