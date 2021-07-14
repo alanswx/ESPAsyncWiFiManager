@@ -145,7 +145,6 @@ public:
   //configuration portal (ESP as access point) is running [default true/on]
   void          setTryConnectDuringConfigPortal(boolean v);
 
-
   void          setDebugOutput(boolean debug);
   //defaults to not showing anything under 8% signal quality if called
   void          setMinimumSignalQuality(int quality = 8);
@@ -157,6 +156,10 @@ public:
   void          setAPCallback( void (*func)(AsyncWiFiManager*) );
   //called when settings have been changed and connection was successful
   void          setSaveConfigCallback( void (*func)(void) );
+  //gets condition that signals if configuration should be saved
+  boolean		shouldSaveConfig () {
+	  return _shouldSaveConfig;
+  }
   //adds a custom parameter
   void          addParameter(AsyncWiFiManagerParameter *p);
   //if this is set, it will exit after config, even if connection is unsucessful.
@@ -260,6 +263,7 @@ private:
 
   void (*_apcallback)(AsyncWiFiManager*) = NULL;
   void (*_savecallback)(void) = NULL;
+  boolean _shouldSaveConfig = false;
 
   AsyncWiFiManagerParameter* _params[WIFI_MANAGER_MAX_PARAMS];
 
