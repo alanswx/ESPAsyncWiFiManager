@@ -689,9 +689,13 @@ void AsyncWiFiManager::resetSettings() {
   DEBUG_WM(F("THIS MAY CAUSE AP NOT TO START UP PROPERLY. YOU NEED TO COMMENT IT OUT AFTER ERASING THE DATA."));
 	
   WiFi.mode(WIFI_AP_STA); // cannot erase if not in STA mode !
-  WiFi.persistent(true);
-  WiFi.disconnect(true,true);
-  WiFi.persistent(false);	
+  WiFi.persistent (true);
+#if defined(ESP8266)
+  WiFi.disconnect (true);
+#else
+  WiFi.disconnect (true, true);
+#endif
+  WiFi.persistent (false);
 	
   //delay(200);
 }
