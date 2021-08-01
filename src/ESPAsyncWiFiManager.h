@@ -15,7 +15,7 @@
 #define ESPAsyncWiFiManager_h
 
 #if defined(ESP8266)
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#include <ESP8266WiFi.h>          // https://github.com/esp8266/Arduino
 #else
 #include <WiFi.h>
 #include "esp_wps.h"
@@ -23,10 +23,10 @@
 #endif
 #include <ESPAsyncWebServer.h>
 
-//#define USE_EADNS               //Uncomment to use ESPAsyncDNSServer
+//#define USE_EADNS               // uncomment to use ESPAsyncDNSServer
 #ifdef USE_EADNS
-#include <ESPAsyncDNSServer.h>    //https://github.com/devyte/ESPAsyncDNSServer
-                                  //https://github.com/me-no-dev/ESPAsyncUDP
+#include <ESPAsyncDNSServer.h>    // https://github.com/devyte/ESPAsyncDNSServer
+                                  // https://github.com/me-no-dev/ESPAsyncUDP
 #else
 #include <DNSServer.h>
 #endif
@@ -123,7 +123,7 @@ public:
   boolean       autoConnect(unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
   boolean       autoConnect(char const *apName, char const *apPassword = NULL, unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
 
-  //if you want to always start the config portal, without trying to connect first
+  // if you want to always start the config portal, without trying to connect first
   boolean       startConfigPortal(char const *apName, char const *apPassword = NULL);
   void startConfigPortalModeless(char const *apName, char const *apPassword);
 
@@ -132,42 +132,42 @@ public:
 
   void          resetSettings();
 
-  //sets timeout before webserver loop ends and exits even if there has been no setup.
-  //usefully for devices that failed to connect at some point and got stuck in a webserver loop
-  //in seconds setConfigPortalTimeout is a new name for setTimeout
+  // sets timeout before webserver loop ends and exits even if there has been no setup.
+  // usefully for devices that failed to connect at some point and got stuck in a webserver loop.
+  // in seconds, setConfigPortalTimeout is a new name for setTimeout
   void          setConfigPortalTimeout(unsigned long seconds);
   void          setTimeout(unsigned long seconds);
 
-  //sets timeout for which to attempt connecting, usefull if you get a lot of failed connects
+  // sets timeout for which to attempt connecting, usefull if you get a lot of failed connects
   void          setConnectTimeout(unsigned long seconds);
 
-  //wether or not the wifi manager tries to connect to configured access point even when
-  //configuration portal (ESP as access point) is running [default true/on]
+  // wether or not the wifi manager tries to connect to configured access point even when
+  // configuration portal (ESP as access point) is running [default true/on]
   void          setTryConnectDuringConfigPortal(boolean v);
 
 
   void          setDebugOutput(boolean debug);
-  //defaults to not showing anything under 8% signal quality if called
+  // defaults to not showing anything under 8% signal quality if called
   void          setMinimumSignalQuality(int quality = 8);
-  //sets a custom ip /gateway /subnet configuration
+  // sets a custom ip /gateway /subnet configuration
   void          setAPStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn);
-  //sets config for a static IP
+  // sets config for a static IP
   void          setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn, IPAddress dns1=(uint32_t)0x00000000, IPAddress dns2=(uint32_t)0x00000000);
-  //called when AP mode and config portal is started
+  // called when AP mode and config portal is started
   void          setAPCallback( void (*func)(AsyncWiFiManager*) );
-  //called when settings have been changed and connection was successful
+  // called when settings have been changed and connection was successful
   void          setSaveConfigCallback( void (*func)(void) );
   //adds a custom parameter
   void          addParameter(AsyncWiFiManagerParameter *p);
-  //if this is set, it will exit after config, even if connection is unsucessful.
+  // if this is set, it will exit after config, even if connection is unsucessful
   void          setBreakAfterConfig(boolean shouldBreak);
-  //if this is set, try WPS setup when starting (this will delay config portal for up to 2 mins)
-  //TODO
-  //if this is set, customise style
+  // if this is set, try WPS setup when starting (this will delay config portal for up to 2 mins)
+  // TODO
+  // if this is set, customise style
   void          setCustomHeadElement(const char* element);
-  //if this is true, remove duplicated Access Points - defaut true
+  // if this is true, remove duplicated Access Points - defaut true
   void          setRemoveDuplicateAPs(boolean removeDuplicates);
-  //sets a custom element to add to options page
+  // sets a custom element to add to options page
   void          setCustomOptionsElement(const char* element);
 
 private:
@@ -244,7 +244,7 @@ private:
   // DNS server
   const byte    DNS_PORT = 53;
 
-  //helpers
+  // helpers
   int           getRSSIasQuality(int RSSI);
   boolean       isIp(String str);
   String        toStringIp(IPAddress ip);
