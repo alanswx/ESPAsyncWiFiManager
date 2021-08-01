@@ -339,7 +339,7 @@ void AsyncWiFiManager::copySSIDInfo(wifi_ssid_count_t n) {
         cssid = wifiSSIDs[i].SSID;
         for (int j = i + 1; j < n; j++) {
           if (cssid == wifiSSIDs[j].SSID) {
-            DEBUG_WM("DUP AP: " +wifiSSIDs[j].SSID);
+            DEBUG_WM(F("DUP AP: ") +wifiSSIDs[j].SSID);
             wifiSSIDs[j].duplicate=true; // set dup aps to NULL
           }
         }
@@ -361,7 +361,7 @@ void AsyncWiFiManager::startConfigPortalModeless(char const *apName, char const 
 
   // setup AP
   WiFi.mode(WIFI_AP_STA);
-  DEBUG_WM("SET AP STA");
+  DEBUG_WM(F("SET AP STA"));
 
   // try to connect
   if (connectWifi("", "") == WL_CONNECTED)   {
@@ -458,7 +458,7 @@ void AsyncWiFiManager::safeLoop(){
 boolean  AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPassword) {
   // setup AP
   WiFi.mode(WIFI_AP_STA);
-  DEBUG_WM("SET AP STA");
+  DEBUG_WM(F("SET AP STA"));
 
   _apName = apName;
   _apPassword = apPassword;
@@ -579,7 +579,7 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
   } else {
 
     if (WiFi.SSID().length() > 0) {
-      DEBUG_WM("Using last saved values, should be faster");
+      DEBUG_WM(F("Using last saved values, should be faster"));
 #if defined(ESP8266)
       // trying to fix connection in progress hanging
       ETS_UART_INTR_DISABLE();
@@ -591,13 +591,13 @@ int AsyncWiFiManager::connectWifi(String ssid, String pass) {
 
       WiFi.begin();
     } else {
-      DEBUG_WM("Try to connect with saved credentials");
+      DEBUG_WM(F("Try to connect with saved credentials"));
       WiFi.begin();
     }
   }
 
   int connRes = waitForConnectResult();
-  DEBUG_WM ("Connection result: ");
+  DEBUG_WM (F("Connection result: "));
   DEBUG_WM ( connRes );
   // not connected, WPS enabled, no pass - first attempt
 #ifdef NO_EXTRA_4K_HEAP
@@ -636,7 +636,7 @@ uint8_t AsyncWiFiManager::waitForConnectResult() {
 }
 #ifdef NO_EXTRA_4K_HEAP
 void AsyncWiFiManager::startWPS() {
-  DEBUG_WM("START WPS");
+  DEBUG_WM(F("START WPS"));
 #if defined(ESP8266)
   WiFi.beginWPSConfig();
 #else
@@ -652,7 +652,7 @@ void AsyncWiFiManager::startWPS() {
   esp_wifi_wps_enable(&config);
   esp_wifi_wps_start(0);
 #endif
-  DEBUG_WM("END WPS");
+  DEBUG_WM(F("END WPS"));
 
 }
 #endif
@@ -672,7 +672,7 @@ String AsyncWiFiManager::getPassword() {
 if (_pass == "") {
 DEBUG_WM(F("Reading Password"));
 _pass = WiFi.psk();
-DEBUG_WM("Password: " + _pass);
+DEBUG_WM(F("Password: ") + _pass);
 //DEBUG_WM(_pass);
 }
 return _pass;
@@ -1148,7 +1148,7 @@ void AsyncWiFiManager::setRemoveDuplicateAPs(boolean removeDuplicates) {
 template <typename Generic>
 void AsyncWiFiManager::DEBUG_WM(Generic text) {
   if (_debug) {
-    Serial.print("*WM: ");
+    Serial.print(F("*WM: "));
     Serial.println(text);
   }
 }
