@@ -142,6 +142,8 @@ void AsyncWiFiManager::setupConfigPortal() {
 }
 
 static const char HEX_CHAR_ARRAY[17] = "0123456789ABCDEF";
+
+#if !defined(ESP8266)
 /**
 * convert char array (hex values) to readable string by seperator
 * buf:           buffer to convert
@@ -164,7 +166,6 @@ static String byteToHexString(uint8_t* buf, uint8_t length, String strSeperator=
   return dataString;
 } // byteToHexString
 
-#if !defined(ESP8266)
 String getESP32ChipID() {
   uint64_t chipid;
   chipid=ESP.getEfuseMac();//The chip ID is essentially its MAC address(length: 6 bytes).
