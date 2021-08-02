@@ -441,7 +441,7 @@ void AsyncWiFiManager::copySSIDInfo(wifi_ssid_count_t n)
         {
           if (cssid == wifiSSIDs[j].SSID)
           {
-            DEBUG_WM(F("DUP AP: ") + wifiSSIDs[j].SSID);
+            DEBUG_WM("DUP AP: " + wifiSSIDs[j].SSID);
             wifiSSIDs[j].duplicate = true; // set dup aps to NULL
           }
         }
