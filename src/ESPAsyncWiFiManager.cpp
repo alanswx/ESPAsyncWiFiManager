@@ -797,7 +797,6 @@ void AsyncWiFiManager::startWPS()
   DEBUG_WM(F("END WPS"));
 }
 #endif
-
 String AsyncWiFiManager::getConfigPortalSSID()
 {
   return _apName;
