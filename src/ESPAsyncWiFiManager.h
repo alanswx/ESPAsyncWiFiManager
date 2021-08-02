@@ -67,23 +67,34 @@ class AsyncWiFiManagerParameter
 {
 public:
   AsyncWiFiManagerParameter(const char *custom);
-  AsyncWiFiManagerParameter(const char *id, const char *placeholder, const char *defaultValue, int length);
-  AsyncWiFiManagerParameter(const char *id, const char *placeholder, const char *defaultValue, int length, const char *custom);
+  AsyncWiFiManagerParameter(const char *id,
+                            const char *placeholder,
+                            const char *defaultValue,
+                            unsigned int length);
+  AsyncWiFiManagerParameter(const char *id,
+                            const char *placeholder,
+                            const char *defaultValue,
+                            unsigned int length,
+                            const char *custom);
 
   const char *getID();
   const char *getValue();
   const char *getPlaceholder();
-  int getValueLength();
+  unsigned int getValueLength();
   const char *getCustomHTML();
 
 private:
   const char *_id;
   const char *_placeholder;
   char *_value;
-  int _length;
+  unsigned int _length;
   const char *_customHTML;
 
-  void init(const char *id, const char *placeholder, const char *defaultValue, int length, const char *custom);
+  void init(const char *id,
+            const char *placeholder,
+            const char *defaultValue,
+            unsigned int length,
+            const char *custom);
 
   friend class AsyncWiFiManager;
 };
@@ -120,8 +131,12 @@ public:
   void criticalLoop();
   String infoAsString();
 
-  boolean autoConnect(unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
-  boolean autoConnect(char const *apName, char const *apPassword = NULL, unsigned long maxConnectRetries = 1, unsigned long retryDelayMs = 1000);
+  boolean autoConnect(unsigned long maxConnectRetries = 1,
+                      unsigned long retryDelayMs = 1000);
+  boolean autoConnect(char const *apName,
+                      char const *apPassword = NULL,
+                      unsigned long maxConnectRetries = 1,
+                      unsigned long retryDelayMs = 1000);
 
   // if you want to always start the config portal, without trying to connect first
   boolean startConfigPortal(char const *apName, char const *apPassword = NULL);
@@ -147,11 +162,15 @@ public:
 
   void setDebugOutput(boolean debug);
   // defaults to not showing anything under 8% signal quality if called
-  void setMinimumSignalQuality(int quality = 8);
+  void setMinimumSignalQuality(unsigned int quality = 8);
   // sets a custom ip /gateway /subnet configuration
   void setAPStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn);
   // sets config for a static IP
-  void setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn, IPAddress dns1 = (uint32_t)0x00000000, IPAddress dns2 = (uint32_t)0x00000000);
+  void setSTAStaticIPConfig(IPAddress ip,
+                            IPAddress gw,
+                            IPAddress sn,
+                            IPAddress dns1 = (uint32_t)0x00000000,
+                            IPAddress dns2 = (uint32_t)0x00000000);
   // called when AP mode and config portal is started
   void setAPCallback(void (*func)(AsyncWiFiManager *));
   // called when settings have been changed and connection was successful
@@ -179,7 +198,7 @@ private:
 
   boolean _modeless;
   unsigned long scannow;
-  int shouldscan;
+  boolean shouldscan = true;
   boolean needInfo = true;
 
   //const int     WM_DONE                 = 0;
@@ -210,8 +229,8 @@ private:
   IPAddress _sta_static_dns1 = (uint32_t)0x00000000;
   IPAddress _sta_static_dns2 = (uint32_t)0x00000000;
 
-  int _paramsCount = 0;
-  int _minimumQuality = -1;
+  unsigned int _paramsCount = 0;
+  unsigned int _minimumQuality = 0;
   boolean _removeDuplicateAPs = true;
   boolean _shouldBreakAfterConfig = false;
 #ifdef NO_EXTRA_4K_HEAP
@@ -223,8 +242,8 @@ private:
   //String        getEEPROMString(int start, int len);
   //void          setEEPROMString(int start, int len, String string);
 
-  int status = WL_IDLE_STATUS;
-  int connectWifi(String ssid, String pass);
+  uint8_t status = WL_IDLE_STATUS;
+  uint8_t connectWifi(String ssid, String pass);
   uint8_t waitForConnectResult();
   void setInfo();
   void copySSIDInfo(wifi_ssid_count_t n);
@@ -243,7 +262,7 @@ private:
   const byte DNS_PORT = 53;
 
   // helpers
-  int getRSSIasQuality(int RSSI);
+  unsigned int getRSSIasQuality(int RSSI);
   boolean isIp(String str);
   String toStringIp(IPAddress ip);
 
