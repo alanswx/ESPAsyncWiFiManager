@@ -163,13 +163,27 @@ void AsyncWiFiManager::setupConfigPortal()
   setInfo();
 
   // setup web pages: root, wifi config pages, SO captive portal detectors and not found
-  server->on("/", std::bind(&AsyncWiFiManager::handleRoot, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
-  server->on("/wifi", std::bind(&AsyncWiFiManager::handleWifi, this, std::placeholders::_1, true)).setFilter(ON_AP_FILTER);
-  server->on("/0wifi", std::bind(&AsyncWiFiManager::handleWifi, this, std::placeholders::_1, false)).setFilter(ON_AP_FILTER);
-  server->on("/wifisave", std::bind(&AsyncWiFiManager::handleWifiSave, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
-  server->on("/i", std::bind(&AsyncWiFiManager::handleInfo, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
-  server->on("/r", std::bind(&AsyncWiFiManager::handleReset, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
-  server->on("/fwlink", std::bind(&AsyncWiFiManager::handleRoot, this, std::placeholders::_1)).setFilter(ON_AP_FILTER); //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
+  server->on("/",
+             std::bind(&AsyncWiFiManager::handleRoot, this, std::placeholders::_1))
+      .setFilter(ON_AP_FILTER);
+  server->on("/wifi",
+             std::bind(&AsyncWiFiManager::handleWifi, this, std::placeholders::_1, true))
+      .setFilter(ON_AP_FILTER);
+  server->on("/0wifi",
+             std::bind(&AsyncWiFiManager::handleWifi, this, std::placeholders::_1, false))
+      .setFilter(ON_AP_FILTER);
+  server->on("/wifisave",
+             std::bind(&AsyncWiFiManager::handleWifiSave, this, std::placeholders::_1))
+      .setFilter(ON_AP_FILTER);
+  server->on("/i",
+             std::bind(&AsyncWiFiManager::handleInfo, this, std::placeholders::_1))
+      .setFilter(ON_AP_FILTER);
+  server->on("/r",
+             std::bind(&AsyncWiFiManager::handleReset, this, std::placeholders::_1))
+      .setFilter(ON_AP_FILTER);
+  server->on("/fwlink",
+             std::bind(&AsyncWiFiManager::handleRoot, this, std::placeholders::_1))
+      .setFilter(ON_AP_FILTER); // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
   server->onNotFound(std::bind(&AsyncWiFiManager::handleNotFound, this, std::placeholders::_1));
   server->begin(); // web server start
   DEBUG_WM(F("HTTP server started"));
@@ -235,10 +249,6 @@ boolean AsyncWiFiManager::autoConnect(char const *apName,
                                       unsigned long retryDelayMs)
 {
   DEBUG_WM(F(""));
-
-  // read eeprom for ssid and pass
-  //String ssid = getSSID();
-  //String pass = getPassword();
 
   // attempt to connect; should it fail, fall back to AP
   WiFi.mode(WIFI_STA);
@@ -788,28 +798,6 @@ void AsyncWiFiManager::startWPS()
 }
 #endif
 
-/*
-String AsyncWiFiManager::getSSID() {
-if (_ssid == "") {
-DEBUG_WM(F("Reading SSID"));
-_ssid = WiFi.SSID();
-DEBUG_WM(F("SSID: "));
-DEBUG_WM(_ssid);
-}
-return _ssid;
-}
-
-String AsyncWiFiManager::getPassword() {
-if (_pass == "") {
-DEBUG_WM(F("Reading Password"));
-_pass = WiFi.psk();
-DEBUG_WM(F("Password: ") + _pass);
-//DEBUG_WM(_pass);
-}
-return _pass;
-}
-*/
-
 String AsyncWiFiManager::getConfigPortalSSID()
 {
   return _apName;
@@ -1239,6 +1227,7 @@ void AsyncWiFiManager::handleNotFound(AsyncWebServerRequest *request)
     // if captive portal redirect instead of displaying the error page
     return;
   }
+
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += request->url();
