@@ -169,7 +169,6 @@ void AsyncWiFiManager::setupConfigPortal()
   server->on("/wifisave", std::bind(&AsyncWiFiManager::handleWifiSave, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
   server->on("/i", std::bind(&AsyncWiFiManager::handleInfo, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
   server->on("/r", std::bind(&AsyncWiFiManager::handleReset, this, std::placeholders::_1)).setFilter(ON_AP_FILTER);
-  //server->on("/generate_204", std::bind(&AsyncWiFiManager::handle204, this));  //Android/Chrome OS captive portal check.
   server->on("/fwlink", std::bind(&AsyncWiFiManager::handleRoot, this, std::placeholders::_1)).setFilter(ON_AP_FILTER); //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
   server->onNotFound(std::bind(&AsyncWiFiManager::handleNotFound, this, std::placeholders::_1));
   server->begin(); // web server start
@@ -1231,17 +1230,6 @@ void AsyncWiFiManager::handleReset(AsyncWebServerRequest *request)
 #endif
   delay(2000);
 }
-
-// removed as mentioned here https://github.com/tzapu/AsyncWiFiManager/issues/114
-/*
-void AsyncWiFiManager::handle204(AsyncWebServerRequest *request) {
-DEBUG_WM(F("204 No Response"));
-request->sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-request->sendHeader("Pragma", "no-cache");
-request->sendHeader("Expires", "-1");
-request->send ( 204, "text/plain", "");
-}
-*/
 
 void AsyncWiFiManager::handleNotFound(AsyncWebServerRequest *request)
 {

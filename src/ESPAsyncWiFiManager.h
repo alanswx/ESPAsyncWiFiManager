@@ -255,7 +255,6 @@ private:
   void handleInfo(AsyncWebServerRequest *);
   void handleReset(AsyncWebServerRequest *);
   void handleNotFound(AsyncWebServerRequest *);
-  void handle204(AsyncWebServerRequest *);
   boolean captivePortal(AsyncWebServerRequest *);
 
   // DNS server
