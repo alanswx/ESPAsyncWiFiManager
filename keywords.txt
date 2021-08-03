@@ -14,8 +14,6 @@ AsyncWiFiManagerParameter KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 autoConnect	KEYWORD2
-getSSID	KEYWORD2
-getPassword	KEYWORD2
 getConfigPortalSSID KEYWORD2
 resetSettings	KEYWORD2
 setConfigPortalTimeout	KEYWORD2
