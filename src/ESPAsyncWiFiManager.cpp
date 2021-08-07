@@ -532,7 +532,7 @@ void AsyncWiFiManager::criticalLoop()
       // using user-provided _ssid, _pass in place of system-stored ssid and pass
       if (connectWifi(_ssid, _pass) != WL_CONNECTED)
       {
-        DEBUG_WM(F("Failed to connect."));
+        DEBUG_WM(F("Failed to connect"));
       }
       else
       {
@@ -579,6 +579,7 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
 
   _apName = apName;
   _apPassword = apPassword;
+  bool connectedDuringConfigPortal = false;
 
   // notify we entered AP mode
   if (_apcallback != NULL)
@@ -615,6 +616,7 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       if (_tryConnectDuringConfigPortal)
       {
         WiFi.begin(); // try to reconnect to AP
+        connectedDuringConfigPortal = true;
       }
       scannow = millis();
     }
@@ -625,7 +627,8 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       // connected
       WiFi.mode(WIFI_STA);
       // notify that configuration has changed and any optional parameters should be saved
-      if (_savecallback != NULL)
+      // configuraton should not be saved when just connected using stored ssid and password during config portal
+      if (!connectedDuringConfigPortal && _savecallback != NULL)
       {
         // TODO: check if any custom parameters actually exist, and check if they really changed maybe
         _savecallback();
@@ -654,7 +657,7 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       }
       else
       {
-        DEBUG_WM(F("Failed to connect."));
+        DEBUG_WM(F("Failed to connect"));
       }
 
       if (_shouldBreakAfterConfig)
@@ -934,7 +937,7 @@ void AsyncWiFiManager::handleWifi(AsyncWebServerRequest *request, boolean scan)
     if (wifiSSIDCount == 0)
     {
       DEBUG_WM(F("No networks found"));
-      page += F("No networks found. Refresh to scan again.");
+      page += F("No networks found. Refresh to scan again");
     }
     else
     {
@@ -1204,7 +1207,7 @@ void AsyncWiFiManager::handleReset(AsyncWebServerRequest *request)
   page += FPSTR(HTTP_STYLE);
   page += _customHeadElement;
   page += FPSTR(HTTP_HEAD_END);
-  page += F("Module will reset in a few seconds.");
+  page += F("Module will reset in a few seconds");
   page += FPSTR(HTTP_END);
   request->send(200, "text/html", page);
 
