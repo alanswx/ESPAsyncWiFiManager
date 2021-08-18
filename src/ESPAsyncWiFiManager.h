@@ -188,6 +188,13 @@ public:
   // sets a custom element to add to options page
   void setCustomOptionsElement(const char *element);
 
+  String getConfiguredSTASSID(){
+      return _ssid;
+  }
+  String getConfiguredSTAPassword(){
+      return _pass;
+  }
+
 private:
   AsyncWebServer *server;
 #ifdef USE_EADNS
