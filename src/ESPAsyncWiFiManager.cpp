@@ -643,7 +643,7 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       DEBUG_WM(F("Connecting to new AP"));
 
       // using user-provided _ssid, _pass in place of system-stored ssid and pass
-      if (connectWifi(_ssid, _pass) == WL_CONNECTED)
+      if (_tryConnectDuringConfigPortal and connectWifi(_ssid, _pass) == WL_CONNECTED)
       {
         // connected
         WiFi.mode(WIFI_STA);
@@ -657,7 +657,8 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       }
       else
       {
-        DEBUG_WM(F("Failed to connect"));
+          if(_tryConnectDuringConfigPortal)
+            DEBUG_WM(F("Failed to connect"));
       }
 
       if (_shouldBreakAfterConfig)
