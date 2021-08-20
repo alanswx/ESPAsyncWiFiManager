@@ -172,9 +172,9 @@ public:
                             IPAddress dns1 = (uint32_t)0x00000000,
                             IPAddress dns2 = (uint32_t)0x00000000);
   // called when AP mode and config portal is started
-  void setAPCallback(void (*func)(AsyncWiFiManager *));
+  void setAPCallback(std::function<void(AsyncWiFiManager *)>);
   // called when settings have been changed and connection was successful
-  void setSaveConfigCallback(void (*func)(void));
+  void setSaveConfigCallback(std::function<void()> func);
   //adds a custom parameter
   void addParameter(AsyncWiFiManagerParameter *p);
   // if this is set, it will exit after config, even if connection is unsucessful
@@ -280,8 +280,8 @@ private:
 
   boolean _tryConnectDuringConfigPortal = true;
 
-  void (*_apcallback)(AsyncWiFiManager *) = NULL;
-  void (*_savecallback)(void) = NULL;
+  std::function<void(AsyncWiFiManager *)> _apcallback;
+  std::function<void()> _savecallback;
 
   AsyncWiFiManagerParameter *_params[WIFI_MANAGER_MAX_PARAMS];
 

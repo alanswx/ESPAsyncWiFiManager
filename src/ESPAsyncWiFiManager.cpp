@@ -1267,13 +1267,13 @@ boolean AsyncWiFiManager::captivePortal(AsyncWebServerRequest *request)
 }
 
 // start up config portal callback
-void AsyncWiFiManager::setAPCallback(void (*func)(AsyncWiFiManager *myAsyncWiFiManager))
+void AsyncWiFiManager::setAPCallback(std::function<void(AsyncWiFiManager *)> func)
 {
   _apcallback = func;
 }
 
 // start up save config callback
-void AsyncWiFiManager::setSaveConfigCallback(void (*func)(void))
+void AsyncWiFiManager::setSaveConfigCallback(std::function<void()> func)
 {
   _savecallback = func;
 }
