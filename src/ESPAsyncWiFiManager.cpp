@@ -643,8 +643,10 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       DEBUG_WM(F("Connecting to new AP"));
 
       // using user-provided _ssid, _pass in place of system-stored ssid and pass
+      WiFi.persistent(true);
       if (_tryConnectDuringConfigPortal and connectWifi(_ssid, _pass) == WL_CONNECTED)
       {
+        WiFi.persistent(false);
         // connected
         WiFi.mode(WIFI_STA);
         // notify that configuration has changed and any optional parameters should be saved
