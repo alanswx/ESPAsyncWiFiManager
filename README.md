@@ -132,7 +132,7 @@ wifiManager.setAPCallback(configModeCallback);
 ```
 `configModeCallback` declaration and example
 ```cpp
-void configModeCallback (WiFiManager *myWiFiManager) {
+void configModeCallback (AsyncWiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
   Serial.println(WiFi.softAPIP());
 
