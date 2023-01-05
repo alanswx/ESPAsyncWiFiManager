@@ -266,5 +266,8 @@ Debug is enabled by default on Serial. To disable add before autoConnect
 ```cpp
 wifiManager.setDebugOutput(false);
 ```
-
+Default Serial is selected, to change the Serial eg. to Serial1 define
+```cpp
+#define ESPASYNCWIFIMANAGER_DEBUG_PORT Serial1
+```
 
